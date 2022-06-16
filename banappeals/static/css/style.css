@@ -1,0 +1,110 @@
+.text-grey {
+    color: #dedede;
+}
+
+.bg-dark-grey {
+    background-color: #1b1b1b;
+}
+
+.bg-darker-grey {
+    background-color: #101010;
+}
+
+.form-control {
+    background-color: #1b1b1b;
+    border: 1px solid #252525;
+    color: #dedede;
+}
+
+.form-control:focus {
+    color: #dedede;
+    background-color: #1b1b1b;
+    border-color: #252525;
+    box-shadow: 0 0 0 0.25rem rgb(49 49 49 / 25%);
+}
+
+.btn-primary {
+    background-color: #1b1b1b;
+    border: 1px solid #252525;
+}
+
+.btn-primary:hover {
+    background-color: #212121;
+    border: 1px solid #252525;
+}
+
+.btn-check:active+.btn-primary, .btn-check:checked+.btn-primary, .btn-primary.active, .btn-primary:active, .show>.btn-primary.dropdown-toggle {
+    background-color: #272727;
+    border: 1px solid #252525;
+}
+
+.btn-check:focus+.btn-primary, .btn-primary:focus {
+    color: #fff;
+    background-color: #272727;
+    border: 1px solid #252525;
+    box-shadow: unset;
+}
+
+.form-control:disabled, .form-control[readonly] {
+    color: #fff;
+    background-color: #1b1b1b;
+    opacity: 1;
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+    color: #fff;
+    background-color: #1b1b1b;
+    border: 1px solid #252525;
+}
+
+.bg-dark {
+    background-color: #101010!important;
+}
+
+.dropdown-item:focus, .dropdown-item:hover {
+    background-color: #191919;
+}
+
+/* Sets show # entries and search text color*/
+.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
+    color: var(--bs-gray-400)!important;
+}
+
+/* Sets table headers text color */
+th.sorting {
+    color: var(--bs-light)!important;
+}
+
+/* Sets table header background color */
+table.dataTable thead .sorting {
+    background-color: #1b1b1b;
+}
+
+/* Sets background color of odd table rows */
+table.dataTable tr.odd {
+    background-color: #171717;
+}
+
+/* Sets background color of even table rows */
+table.dataTable tr.even {
+    background-color: #1d1d1d;
+}
+
+/* Sets text color of table text */
+table.dataTable tbody {
+    color: var(--bs-gray-400)!important;
+}
+
+/* Improves color of error/danger alert */
+.alert-danger {
+    color: #ffffff;
+    background-color: #ff13131f;
+    border-color: #92000e;
+}
+
+/* Improves color of info alert */
+.alert-info {
+    color: #ffffff;
+    background-color: #2b7a8a47;
+    border-color: #2f8d9e;
+}

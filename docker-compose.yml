@@ -1,0 +1,21 @@
+version: "3.3"
+services:
+  webapp:
+    image: docker.pkg.github.com/snaacky/banappeals/banappeals:latest
+    restart: unless-stopped
+    volumes:
+        - ${DATABASE_FOLDER}:/app/config/
+    environment:
+        - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+        - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+        - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
+        - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+        - OAUTHLIB_INSECURE_TRANSPORT=${OAUTHLIB_INSECURE_TRANSPORT}
+        - EDITORS=${EDITORS}
+        - GUILD_ID=${GUILD_ID}
+        - ACCEPTING=${ACCEPTING}
+        - MIN_ACCOUNT_MONTHS=${MIN_ACCOUNT_MONTHS}
+        - PROXYCHECK_KEY=${PROXYCHECK_KEY}
+        - ADMINS=${ADMINS}
+    ports:
+      - "${PORT}:8080"

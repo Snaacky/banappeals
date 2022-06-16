@@ -1,0 +1,244 @@
+{% include "header.htm" %}
+   <div class="bg-dark-grey px-4 py-5">
+      <div class="py-5">
+         <div class="container">
+            <div class="col-lg-6 mx-auto text-grey">
+               <h1 class="fw-bold text-white pb-4">Review</h1>
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-data" viewBox="0 0 16 16">
+                  <path d="M4 11a1 1 0 1 1 2 0v1a1 1 0 1 1-2 0v-1zm6-4a1 1 0 1 1 2 0v5a1 1 0 1 1-2 0V7zM7 9a1 1 0 0 1 2 0v3a1 1 0 1 1-2 0V9z"/>
+                  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+               </svg>
+               <b>{{ stats['pending'] }} pending, {{ stats['total'] }} total, {{ stats['accepted'] }} accepted, {{ stats['denied'] }} denied</b>
+            </div>
+         </div>
+      </div>
+   </div>
+   {% if application %}
+   <div class="px-4 py-5">
+      <div class="container">
+         <div class="card mb-5" style="border-radius: 25%; border: 0;">
+            <div class="card-header" style="background-color: #1b1b1b;color: white;">
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-input-cursor-text" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M5 2a.5.5 0 0 1 .5-.5c.862 0 1.573.287 2.06.566.174.099.321.198.44.286.119-.088.266-.187.44-.286A4.165 4.165 0 0 1 10.5 1.5a.5.5 0 0 1 0 1c-.638 0-1.177.213-1.564.434a3.49 3.49 0 0 0-.436.294V7.5H9a.5.5 0 0 1 0 1h-.5v4.272c.1.08.248.187.436.294.387.221.926.434 1.564.434a.5.5 0 0 1 0 1 4.165 4.165 0 0 1-2.06-.566A4.561 4.561 0 0 1 8 13.65a4.561 4.561 0 0 1-.44.285 4.165 4.165 0 0 1-2.06.566.5.5 0 0 1 0-1c.638 0 1.177-.213 1.564-.434.188-.107.335-.214.436-.294V8.5H7a.5.5 0 0 1 0-1h.5V3.228a3.49 3.49 0 0 0-.436-.294A3.166 3.166 0 0 0 5.5 2.5.5.5 0 0 1 5 2z"/>
+                  <path d="M10 5h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4v1h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4v1zM6 5V4H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4v-1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4z"/>
+               </svg>
+               Application Information
+            </div>
+            <div class="table-responsive">
+               <table class="table table-dark table-borderless" style="margin-bottom: 0;">
+                  <thead>
+                     <tr class="d-flex" style="--bs-table-bg: #151515!important;">
+                        <th class="col-1">ID</th>
+                        <th class="col-3">Applicant</th>
+                        <th class="col-2">Submitted</th>
+                        <th class="col-2">Country</th>
+                        <th class="col-1">Status</th>
+                        <th class="col-3">Reviewer</th>
+                     </tr>
+                  </thead>
+                  <tbody style="--bs-table-bg: #1b1b1b;">
+                     <tr class="d-flex">
+                        <th class="col-1" scope="row">{{ application.id }}</th>
+                        <td class="col-3">
+                           {% if applicant.avatar %}
+                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://cdn.discordapp.com/avatars/{{ applicant.id }}/{{ applicant.avatar }}.png">
+                           {% else %}
+                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://i.imgur.com/LIxmtb7.png">
+                           {% endif %}
+                           {{ applicant.username }}#{{ applicant.discriminator }}
+                        </td>
+                        <td class="col-2">{{ application.timestamp | format_timestamp}} </td>
+                        <td class="col-2">{{ application.ip_address | ip2geo }}</td>
+                        {% if application.application_status == None %}
+                        <td class="col-1 bg-light text-dark">Pending</td>
+                        {% elif application.application_status == True %}
+                        <td class="col-1 bg-success">Accepted</td>
+                        {% else %}
+                        <td class="col-1 bg-danger">Denied</td>
+                        {% endif %} 
+                        <td class="col-3">
+                           {% set application_reviewer = application.reviewed_by | get_reviewer_from_discord_id %}
+                           {% if application_reviewer %}
+                           
+                           {% if application.avatar %}
+                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://cdn.discordapp.com/avatars/{{ application_reviewer.discord_id }}/{{ application_reviewer.avatar }}.png">
+                           {% else %}
+                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://i.imgur.com/LIxmtb7.png">
+                           {% endif %}
+
+                           {{ application_reviewer.username }}#{{ application_reviewer.discriminator }}
+                           {% else %}
+                           N/A
+                           {% endif %}
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <div class="col-lg-6 mx-auto text-grey">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}  
+            {% for category, message in messages %} 
+            <div class="alert alert-{{ category }} alert-dismissible fade show mb-5" role="alert">
+               {{ message }}
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <form action="/submit" method="post">
+               <div class="pb-4">
+                  <div class="float-start">
+                     {% if previous_app %}
+                     <a href="/review/{{ previous_app.id }}" class="btn btn-primary btn-sm">
+                     {% else %}
+                     <a href="#" class="btn btn-primary btn-sm disabled">
+                     {% endif %}
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
+                           <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5zM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5z"/>
+                        </svg>
+                        Previous
+                     </a>
+                     {% if next_app %}
+                     <a href="/review/{{ next_app.id }}" class="btn btn-primary btn-sm">
+                     {% else %}
+                     <a href="#" class="btn btn-primary btn-sm disabled">
+                     {% endif %}
+                        Next
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-right" viewBox="0 0 16 16">
+                           <path fill-rule="evenodd" d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8zm-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5z"/>
+                        </svg>
+                     </a>
+                  </div>
+                  <div class="float-end">
+                     <a href="/approve/{{ application.id }}" class="btn btn-success btn-sm {% if application.application_status == True %} disabled {% endif %}">
+                        <svg style="margin-top: -3px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                           <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                        Accept Application
+                     </a>
+                     <a href="/reject/{{ application.id }}" class="btn btn-danger btn-sm {% if application.application_status == False %} disabled {% endif %}">
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                        Reject Application
+                     </a>
+                  </div>
+               </div>
+               <div class="pt-5 mb-5">
+                  <label for="emailAddress" class="form-label"><b>Question #1:</b> What is your email? <span title="Required" style="color:red">*</span></label>
+                  <input type="email" class="form-control" name="emailAddress" id="emailAddress" maxlength="100" value="{{ application.email_address }}"readonly>
+               </div>
+               <div class="mb-5">
+                  <label for="redditUsername" class="form-label"><b>Question #2:</b> What is your Reddit username?</label>
+                  <input type="text" class="form-control" name="redditUsername" id="redditUsername" maxlength="20" value="{{ application.reddit_username }} " readonly>
+               </div>
+               <div class="mb-5">
+                  <label for="whereDidYouHear" class="form-label"><b>Question #3:</b> Where did you hear about Snackbox? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whereDidYouHear" name="whereDidYouHear" rows="9" maxlength="1500" readonly>{{ application.referral }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="tellUsAboutYourself" class="form-label"><b>Question #4:</b> Tell us a bit about yourself. <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="tellUsAboutYourself" name="tellUsAboutYourself" rows="9" maxlength="1500" readonly>{{ application.about_me }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatDoYouExpect" class="form-label"><b>Question #5:</b> What do you expect to get out of Snackbox? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatDoYouExpect" name="whatDoYouExpect" rows="9" maxlength="1500" readonly>{{ application.expectations }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatDoYouKnowAbout" class="form-label"><b>Question #6:</b> What do you know about Snackbox already? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatDoYouKnowAbout" name="whatDoYouKnowAbout" rows="9" maxlength="1500" readonly>{{ application.already_known }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whyShouldYouBeOffered" class="form-label"><b>Question #7:</b> Why should you be offered a place in our community? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyShouldYouBeOffered" name="whyShouldYouBeOffered" rows="9" maxlength="1500" readonly>{{ application.why_should_be_invited }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatAnimeAreYouWatching" class="form-label"><b>Question #8:</b> What anime are you currently watching? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatAnimeAreYouWatching" name="whatAnimeAreYouWatching" rows="9" maxlength="1500" readonly>{{ application.currently_watching }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatIsYourFavoriteAnime" class="form-label"><b>Question #9:</b> What is your favorite anime and why? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatIsYourFavoriteAnime" name="whatIsYourFavoriteAnime" rows="9" maxlength="1500" readonly>{{ application.favorite_anime }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="doYouHaveAList" class="form-label"><b>Question #10:</b> Do you have a MAL, AL, or Kitsu?</label>
+                  <textarea class="form-control" id="doYouHaveAList" name="doYouHaveAList" rows="9" maxlength="1500">{{ application.do_you_have_a_list }}</textarea>
+               </div>
+               <div class="mb-5">
+                  <div class="float-start">
+                     {% if previous_app %}
+                     <a href="/review/{{ previous_app.id }}" class="btn btn-primary btn-sm">
+                     {% else %}
+                     <a href="#" class="btn btn-primary btn-sm disabled">
+                     {% endif %}
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
+                           <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5zM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5z"/>
+                        </svg>
+                        Previous
+                     </a>
+                     {% if next_app %}
+                     <a href="/review/{{ next_app.id }}" class="btn btn-primary btn-sm">
+                     {% else %}
+                     <a href="#" class="btn btn-primary btn-sm disabled">
+                     {% endif %}
+                        Next
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-right" viewBox="0 0 16 16">
+                           <path fill-rule="evenodd" d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8zm-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5z"/>
+                        </svg>
+                     </a>
+                  </div>
+                  <div class="float-end">
+                     <a href="/approve/{{ application.id }}" class="btn btn-success btn-sm {% if application.application_status == True %} disabled {% endif %}">
+                        <svg style="margin-top: -3px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                           <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                        Accept Application
+                     </a>
+                     <a href="/reject/{{ application.id }}" class="btn btn-danger btn-sm {% if application.application_status == False %} disabled {% endif %}">
+                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                        Reject Application
+                     </a>
+                  </div>
+               </div>
+            </form>
+   {% endif %}
+
+            {% if not application and stats['total'] == 0 %}
+            <div class="py-5">
+               <div class="container">
+                  <div class="col-lg-6 mx-auto text-grey">
+                     <p class="fs-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-square-text-fill" viewBox="0 0 16 16">
+                           <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                        </svg>
+                        No applications have been submitted.
+                     </p>
+                  </div>
+               </div>
+            </div>
+            {% endif %}
+            
+            {% if not application and stats['total'] >= 1 %} 
+            <div class="py-5">
+               <div class="container">
+                  <div class="col-lg-6 mx-auto text-grey">
+                     <p class="fs-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-ui-radios" viewBox="0 0 16 16">
+                           <path d="M7 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1zM0 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm7-1.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1zm0-5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM3 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 4.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                         </svg>
+                        There are no applications pending review.
+                     </p>
+                  </div>
+               </div>
+            </div>
+            {% endif %}
+         </div>
+      </div>
+   </div>
+</body>
+{% include "footer.htm" %}

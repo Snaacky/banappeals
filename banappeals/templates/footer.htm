@@ -1,0 +1,24 @@
+<script>
+    function searchDiscordID() {
+       var id = prompt("Enter the Discord snowflake (ID) of the user whose application you want to lookup:", "123949837791002625");
+       if (id) {
+          window.location = `/search/id/${id}`;
+       }
+    }
+    
+    function searchEmailAddress() {
+       var email = prompt("Enter the email address of the user whose application you want to lookup:", "tips@fbi.gov");
+       if (email) {
+          window.location = `/search/email/${email}`;
+       }
+    }
+
+    function searchDiscordUsername() {
+       var username = encodeURIComponent(prompt("Enter the Discord username in Username#0000 format of the user whose application you want to lookup:", "Snaacky#0001"));
+       if (username) {
+          window.location = `/search/username/${(username)}`;
+       }
+    }
+ </script>
+ <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+ </html>

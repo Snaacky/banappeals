@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<head>
+   <title>Snackbox :: Applications</title>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+   <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-darker-grey">
+   <div class="bg-dark-grey px-4 py-5">
+      <div class="py-5">
+         <div class="container">
+            <div class="col-lg-6 mx-auto text-grey">
+               <div>
+                  <div class="float-start" style="padding-right: 10px">
+                     <img width="72" height="72" src="{{ url_for('static', filename='img/logo.png') }}">
+                  </div> 
+                  <div>
+                     <h1 class="fw-bold text-white" style="padding-top: 15px">Invite application</h1>
+                  </div>
+               </div>
+               <br>
+               <b>Welcome to Snackbox!</b>
+               <br><br>
+               <p>Snackbox is a community centralized around Japanese media, including anime, manga, music, and more. Anyone with an interest in these is welcome to submit an application. We're always striving to build the community and make it an even better place to be.</p>
+               <p><b>All responses are required unless otherwise noted.</b> Put some effort into your answers; applications with half-assed responses will be rejected without further consideration. You should make an attempt to use properly formatted English, as unintelligible responses are more likely to be rejected.</p>
+               <p>If you have already applied, you can check the status of your application <a class="text-white" href="/status">here</a>.</p>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="px-4 py-5">
+      <div class="container">
+         <div class="col-lg-6 mx-auto text-grey">
+            <div class="mb-5">
+               {% if not user %}
+               <div class="d-grid">
+                  <a href="/login" class="btn" style="background-color: #5865F2; color: #ffffff">
+                     <img width=24 height=24 src="{{ url_for('static', filename='img/discord.svg') }}" style="vertical-align: bottom"> 
+                      Authenticate with Discord
+                  </a>
+               </div>
+            </div>
+            {% endif %}
+
+            {% if user and user.id in editors %}
+            <div class="mb-5">
+               <a href="/review" class="text-white"> Management panel</a>
+            </div>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}   
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show my-5" role="alert">
+               {{ message }}
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {% if user and not eligible %}
+            <p>Your account is not eligible for application signup.</p>
+            {% endif %}
+            
+            {% if not accepting and closed_message %}
+            <p>{{ closed_message }}</p>
+            {% endif %}
+            
+            {% if not accepting and not closed_message %}
+            <p>Applications are not being accepted at this time.</p>
+            {% endif %}
+            
+            {% if user and status != True and eligible and accepting %}
+            <form action="/submit" method="post" onsubmit="return confirm('Are you sure you want to submit your form? You will not be able to edit it after submission.');">
+               <div class="mb-5">
+                  <label for="emailAddress" class="form-label"><b>Question #1:</b> What is your email? <span title="Required" style="color:red">*</span></label>
+                  <input type="email" class="form-control" name="emailAddress" id="emailAddress" maxlength="100" required>
+               </div>
+               <div class="mb-5">
+                  <label for="redditUsername" class="form-label"><b>Question #2:</b> What is your Reddit username?</label>
+                  <input type="text" class="form-control" name="redditUsername" id="redditUsername" maxlength="20">
+               </div>
+               <div class="mb-5">
+                  <label for="whereDidYouHear" class="form-label"><b>Question #3:</b> Where did you hear about Snackbox? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whereDidYouHear" name="whereDidYouHear" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="tellUsAboutYourself" class="form-label"><b>Question #4:</b> Tell us a bit about yourself. <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="tellUsAboutYourself" name="tellUsAboutYourself" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatDoYouExpect" class="form-label"><b>Question #5:</b> What do you expect to get out of Snackbox? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatDoYouExpect" name="whatDoYouExpect" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatDoYouKnowAbout" class="form-label"><b>Question #6:</b> What do you know about Snackbox already? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatDoYouKnowAbout" name="whatDoYouKnowAbout" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whyShouldYouBeOffered" class="form-label"><b>Question #7:</b> Why should you be offered a place in our community? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyShouldYouBeOffered" name="whyShouldYouBeOffered" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatAnimeAreYouWatching" class="form-label"><b>Question #8:</b> What anime are you currently watching? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatAnimeAreYouWatching" name="whatAnimeAreYouWatching" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="whatIsYourFavoriteAnime" class="form-label"><b>Question #9:</b> What is your favorite anime and why? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whatIsYourFavoriteAnime" name="whatIsYourFavoriteAnime" rows="5" maxlength="1500" required></textarea>
+               </div>
+               <div class="mb-5">
+                  <label for="doYouHaveAList" class="form-label"><b>Question #10:</b> Do you have a MAL, AL, or Kitsu?</label>
+                  <textarea class="form-control" id="doYouHaveAList" name="doYouHaveAList" rows="5" maxlength="1500"></textarea>
+               </div>
+               <div class="d-grid">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+               </div>
+            </form>
+            {% endif %}
+         </div>
+      </div>
+   </div>
+</body>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</html>

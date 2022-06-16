@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<head>
+   <title>Snackbox :: Status</title>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+   <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-darker-grey">
+   <div class="bg-dark-grey px-4 py-5">
+      <div class="py-5">
+         <div class="container">
+            <div class="col-lg-6 mx-auto text-grey">
+               <h1 class="fw-bold text-white">Application status</h1>
+               <br>
+               {% if application.application_status == None %}
+               <b>Your application is pending</b>
+               <br><br>
+               <p>We expect to receive a large amount of applications and it will take time for all of them to be reviewed and for a verdict to be reached. Do not contact us or ask when your application will be reviewed, doing so will result in your application being rejected.</p>
+               <p>Once your application is reviewed, the verdict will be reflected below alongside your application. If you are accepted into the community, a link will appear that will allow you to join  the server.</p>
+                {% elif application.application_status == True %}
+                <b style="color:#03980f">Your application has been accepted</b>
+                <br><br>
+               <p>Click the button below to join our Discord server.</p>
+                {% elif application.application_status == False %}
+                <b style="color:#ff283c">Your application has been rejected</b>
+                <br><br>
+                <p>Better luck next time.</p>
+                {% endif %}
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="px-4 py-5">
+      <div class="container">
+         <div class="col-lg-6 mx-auto text-grey">
+            <div class="mb-5">
+               {% if application.application_status == True %}
+               <div class="d-grid">
+                  <a href="/join" class="btn" style="background-color: #5865F2; color: #ffffff">
+                     <img width=24 height=24 src="{{ url_for('static', filename='img/discord.svg') }}" style="vertical-align: bottom"> 
+                      Join the Discord server
+                  </a>
+               </div>
+            </div>
+            {% endif %}
+
+            <div class="mb-5">
+                <label for="emailAddress" class="form-label"><b>Question #1:</b> What is your email? <span title="Required" style="color:red">*</span></label>
+                <input type="email" class="form-control" name="emailAddress" id="emailAddress" maxlength="100" value="{{ application.email_address }}"readonly>
+             </div>
+             <div class="mb-5">
+                <label for="redditUsername" class="form-label"><b>Question #2:</b> What is your Reddit username?</label>
+                <input type="text" class="form-control" name="redditUsername" id="redditUsername" maxlength="20" value="{{ application.reddit_username }} " readonly>
+             </div>
+             <div class="mb-5">
+                <label for="whereDidYouHear" class="form-label"><b>Question #3:</b> Where did you hear about Snackbox? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whereDidYouHear" name="whereDidYouHear" rows="8" maxlength="1500" readonly>{{ application.referral }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="tellUsAboutYourself" class="form-label"><b>Question #4:</b> Tell us a bit about yourself. <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="tellUsAboutYourself" name="tellUsAboutYourself" rows="8" maxlength="1500" readonly>{{ application.about_me }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="whatDoYouExpect" class="form-label"><b>Question #5:</b> What do you expect to get out of Snackbox? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whatDoYouExpect" name="whatDoYouExpect" rows="8" maxlength="1500" readonly>{{ application.expectations }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="whatDoYouKnowAbout" class="form-label"><b>Question #6:</b> What do you know about Snackbox already? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whatDoYouKnowAbout" name="whatDoYouKnowAbout" rows="8" maxlength="1500" readonly>{{ application.already_known }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="whyShouldYouBeOffered" class="form-label"><b>Question #7:</b> Why should you be offered a place in our community? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whyShouldYouBeOffered" name="whyShouldYouBeOffered" rows="8" maxlength="1500" readonly>{{ application.why_should_be_invited }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="whatAnimeAreYouWatching" class="form-label"><b>Question #8:</b> What anime are you currently watching? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whatAnimeAreYouWatching" name="whatAnimeAreYouWatching" rows="8" maxlength="1500" readonly>{{ application.currently_watching }}</textarea>
+             </div>
+             <div class="mb-5">
+                <label for="whatIsYourFavoriteAnime" class="form-label"><b>Question #9:</b> What is your favorite anime and why? <span title="Required" style="color:red">*</span></label>
+                <textarea class="form-control" id="whatIsYourFavoriteAnime" name="whatIsYourFavoriteAnime" rows="8" maxlength="1500" readonly>{{ application.favorite_anime }}</textarea>
+             </div>
+             <div class="mb-5">
+               <label for="doYouHaveAList" class="form-label"><b>Question #10:</b> Do you have a MAL, AL, or Kitsu?</label>
+               <textarea class="form-control" id="doYouHaveAList" name="doYouHaveAList" rows="5" maxlength="1500">{{ application.do_you_have_a_list }}</textarea>
+            </div>
+         </div>
+      </div>
+   </div>
+</body>
+</html>
