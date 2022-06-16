@@ -2,10 +2,10 @@ from flask import Blueprint, current_app as app, redirect, flash
 from flask.templating import render_template
 from flask_discord import requires_authorization
 
-import database
-import blueprints.utils as utils
+import banappeals.blueprints.utils as utils
+from banappeals.database import Database as db
 
-bp = Blueprint('views', __name__)
+bp = Blueprint("views", __name__)
 
 
 @bp.route("/")
@@ -26,28 +26,21 @@ def index():
     the EDITORS environment variable, it will render a link to the
     management panel.
     """
-
-    # Default to None in case the variable is never set otherwise.
-    user = None
-    status = None
-
-    # Update the variables with the authenticated data.
     if app.discord.authorized:
         user = app.discord.fetch_user()
-        status = database.check_if_app_exists(user.id)
+        status = db().check_if_app_exists(user.id)
 
-    # Render the index viewport.
     return render_template(
         template_name_or_list="index.htm",
-        user=user,
-        status=status,
+        user=user or None,
+        status=status or None,
         editors=app.config["EDITORS"],
         accepting=app.config["ACCEPTING"],
-        closed_message=app.config["CLOSED_MESSAGE"]
+        closed_message=app.config["CLOSED_MESSAGE"],
     )
 
 
-@bp.route("/review", defaults={'id': None})
+@bp.route("/review", defaults={"id": None})
 @bp.route("/review/<id>")
 @requires_authorization
 @utils.editors_only
@@ -65,27 +58,21 @@ def review(id):
     """
 
     if id:
-        application = database.get_application(id)
+        application = db().get_application(id)
     else:
-        application = database.get_oldest_pending_application()
+        application = db().get_oldest_pending_application()
 
-    if application:
-        previous_app, next_app = database.get_surrounding_applications(application["id"])
-        applicant = utils.get_discord_user_by_id(application["discord_id"])
+    previous_app, next_app = db().get_surrounding_applications(application["id"])
+    applicant = utils.get_discord_user_by_id(application["discord_id"])
 
-    # Render the management panel viewport.
     return render_template(
         template_name_or_list="review.htm",
-        # Get the current management panel statistics.
-        stats=database.get_stats(),
-        # Get the reviewer's Discord profile.
-        reviewer=app.discord.fetch_user(),
-        # Get the applicant's Discord profile.
-        applicant=applicant,
-        # Passes the application fetched from the database.
-        application=application,
+        stats=db().get_stats(),  # Get the current management panel statistics.
+        reviewer=app.discord.fetch_user(),  # Get the reviewer's Discord profile.
+        applicant=applicant,  # Get the applicant's Discord profile.
+        application=application,  # Passes the application fetched from the database.
         previous_app=previous_app,
-        next_app=next_app
+        next_app=next_app,
     )
 
 
@@ -110,7 +97,7 @@ def status():
     user = app.discord.fetch_user()
 
     # Using the user's Discord ID, get the application SQLite ID.
-    id = database.get_application_id_from_discord_id(user.id)
+    id = db().get_application_id_from_discord_id(user.id)
 
     # Redirect back to the application if no application submitted.
     if not id:
@@ -118,12 +105,9 @@ def status():
         return redirect("/")
 
     # Request the application from the database using the SQLite ID.
-    application = database.get_application(id)
+    application = db().get_application(id)
 
-    return render_template(
-        template_name_or_list="status.htm",
-        application=application
-    )
+    return render_template(template_name_or_list="status.htm", application=application)
 
 
 @bp.route("/overview")
@@ -132,9 +116,9 @@ def status():
 def overview():
     return render_template(
         template_name_or_list="overview.htm",
-        stats=database.get_stats(),
+        stats=db().get_stats(),
         reviewer=app.discord.fetch_user(),
-        applications=database.get_reviewed_applications()
+        applications=db().get_reviewed_applications(),
     )
 
 
@@ -142,8 +126,4 @@ def overview():
 @requires_authorization
 @utils.admins_only
 def admin():
-    return render_template(
-        template_name_or_list="admin.htm",
-        stats=database.get_stats(),
-        reviewer=app.discord.fetch_user()
-    )
+    return render_template(template_name_or_list="admin.htm", stats=db().get_stats(), reviewer=app.discord.fetch_user())

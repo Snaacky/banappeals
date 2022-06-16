@@ -4,10 +4,10 @@ from flask import Blueprint, current_app as app, redirect, request, flash
 from flask.helpers import url_for
 from flask_discord import requires_authorization
 
-import database
 import blueprints.utils as utils
+from banappeals.database import Database as db
 
-bp = Blueprint('api', __name__)
+bp = Blueprint("api", __name__)
 
 
 @bp.route("/submit", methods=["POST"])
@@ -26,7 +26,7 @@ def submit():
     user = app.discord.fetch_user()
 
     # Don't allow users to submit multiple applications per user.
-    if database.get_application_id_from_discord_id(user.id):
+    if db().get_application_id_from_discord_id(user.id):
         flash("You already submitted an application.", "danger")
         return redirect(url_for("views.index"))
 
@@ -41,16 +41,23 @@ def submit():
         "why_should_be_invited": request.form.get("whyShouldYouBeOffered")[0:1500],
         "currently_watching": request.form.get("whatAnimeAreYouWatching")[0:1500],
         "favorite_anime": request.form.get("whatIsYourFavoriteAnime")[0:1500],
-        "do_you_have_a_list": request.form.get("doYouHaveAList")[0:1500]
+        "do_you_have_a_list": request.form.get("doYouHaveAList")[0:1500],
     }
 
     # Check if any of the POST variables were missing and return HTTP 400 if so.
-    if not any([
-        data["email_address"], data["reddit_username"], data["referral"],
-        data["about_me"], data["expectations"], data["already_known"],
-        data["why_should_be_invited"], data["currently_watching"],
-        data["favorite_anime"]
-    ]):
+    if not any(
+        [
+            data["email_address"],
+            data["reddit_username"],
+            data["referral"],
+            data["about_me"],
+            data["expectations"],
+            data["already_known"],
+            data["why_should_be_invited"],
+            data["currently_watching"],
+            data["favorite_anime"],
+        ]
+    ):
         flash("POST data was missing from your submission.", "danger")
         return redirect(url_for("views.index"))
 
@@ -84,7 +91,7 @@ def submit():
     data["reviewed_by"] = None
 
     # Insert the received POST data into the database and return HTTP 200.
-    database.insert_data_into_db(table="applications", data=data)
+    db().insert_data_into_db(table="applications", data=data)
     flash("Your application has been successfully submitted.", "info")
     return redirect(url_for("views.index"))
 
@@ -104,10 +111,10 @@ def accept_application(id):
     reviewer = app.discord.fetch_user()
 
     # Updates the entry in the database as approved.
-    database.update_application_status(id, status=True, reviewed_by=reviewer.id)
+    db().update_application_status(id, status=True, reviewed_by=reviewer.id)
 
     # Redirects back to the last application if no newer exists.
-    next = database.get_application(int(id) + 1)
+    next = db().get_application(int(id) + 1)
     if not next:
         return redirect(url_for("views.review"))
 
@@ -130,10 +137,10 @@ def reject_application(id):
     reviewer = app.discord.fetch_user()
 
     # Updates the entry in the database as approved.
-    database.update_application_status(id, status=False, reviewed_by=reviewer.id)
+    db().update_application_status(id, status=False, reviewed_by=reviewer.id)
 
     # Redirects back to the last application if no newer exists.
-    next = database.get_application(int(id) + 1)
+    next = db().get_application(int(id) + 1)
     if not next:
         return redirect(url_for("views.index"))
 
@@ -151,7 +158,7 @@ def search_application_by_id(id):
     redirects back to the review panel home page.
     """
     # Attempt to lookup the SQLite ID by the Discord ID.
-    id = database.get_application_id_from_discord_id(id)
+    id = db().get_application_id_from_discord_id(id)
 
     # If we were unable to find anything, flash an error and redirect.
     if not id:
@@ -173,7 +180,7 @@ def search_application_by_email(email):
     """
 
     # Attempt to lookup the SQLite ID by the email address.
-    id = database.get_application_id_from_email(email)
+    id = db().get_application_id_from_email(email)
 
     # If we were unable to find anything, flash an error and redirect.
     if not id:
@@ -196,10 +203,7 @@ def search_application_by_username(username):
 
     # Attempt to lookup the SQLite ID by the email address.
     username, discriminator = username.split("#")
-    id = database.get_application_id_from_discord_user(
-        username=username,
-        discriminator=discriminator
-    )
+    id = db().get_application_id_from_discord_user(username=username, discriminator=discriminator)
 
     # If we were unable to find anything, flash an error and redirect.
     if not id:
@@ -224,10 +228,10 @@ def join_server():
     user = app.discord.fetch_user()
 
     # Using the user's Discord ID, get the application ID.
-    id = database.get_application_id_from_discord_id(user.id)
+    id = db().get_application_id_from_discord_id(user.id)
 
     # Request the application data from the database using the application ID.
-    application = database.get_application(id)
+    application = db().get_application(id)
 
     # Redirect the user back if they don't have an accepted application.
     if not application or not application["application_status"]:
