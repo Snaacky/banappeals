@@ -5,7 +5,8 @@ from flask.helpers import url_for
 from flask_discord import requires_authorization
 
 import blueprints.utils as utils
-from banappeals.database import Database as db
+from banappeals import database as db
+
 
 bp = Blueprint("api", __name__)
 
@@ -26,7 +27,7 @@ def submit():
     user = app.discord.fetch_user()
 
     # Don't allow users to submit multiple applications per user.
-    if db().get_application_id_from_discord_id(user.id):
+    if db.get_application_id_from_discord_id(user.id):
         flash("You already submitted an application.", "danger")
         return redirect(url_for("views.index"))
 
@@ -80,7 +81,6 @@ def submit():
             return redirect(url_for("views.index"))
 
     # Further define the various variables we'll need to insert into the database.
-    user = app.discord.fetch_user()
     data["username"] = user.name
     data["discriminator"] = user.discriminator
     data["avatar"] = user.avatar_hash
@@ -91,7 +91,7 @@ def submit():
     data["reviewed_by"] = None
 
     # Insert the received POST data into the database and return HTTP 200.
-    db().insert_data_into_db(table="applications", data=data)
+    db.insert_data_into_db(table="applications", data=data)
     flash("Your application has been successfully submitted.", "info")
     return redirect(url_for("views.index"))
 
@@ -106,15 +106,11 @@ def accept_application(id):
     next application. If no newer applications exists, will redirect
     back to application that was just accepted.
     """
-
-    # Fetches the Discord user object of the reviewer.
     reviewer = app.discord.fetch_user()
-
-    # Updates the entry in the database as approved.
-    db().update_application_status(id, status=True, reviewed_by=reviewer.id)
+    db.update_application_status(id, status=True, reviewed_by=reviewer.id)
 
     # Redirects back to the last application if no newer exists.
-    next = db().get_application(int(id) + 1)
+    next = db.get_application(int(id) + 1)
     if not next:
         return redirect(url_for("views.review"))
 
@@ -132,19 +128,11 @@ def reject_application(id):
     next application. If no newer applications exists, will redirect
     back to application that was just accepted.
     """
-
-    # Fetches the Discord user object of the reviewer.
     reviewer = app.discord.fetch_user()
-
-    # Updates the entry in the database as approved.
-    db().update_application_status(id, status=False, reviewed_by=reviewer.id)
-
-    # Redirects back to the last application if no newer exists.
-    next = db().get_application(int(id) + 1)
+    db.update_application_status(id, status=False, reviewed_by=reviewer.id)
+    next = db.get_application(int(id) + 1)
     if not next:
         return redirect(url_for("views.index"))
-
-    # Otherwise, redirects to the next application as expected.
     return redirect(f"/review/{int(id) + 1}")
 
 
@@ -157,60 +145,10 @@ def search_application_by_id(id):
     applicants Discord ID. If the applicant doesn't exist,
     redirects back to the review panel home page.
     """
-    # Attempt to lookup the SQLite ID by the Discord ID.
-    id = db().get_application_id_from_discord_id(id)
-
-    # If we were unable to find anything, flash an error and redirect.
+    id = db.get_application_id_from_discord_id(id)
     if not id:
         flash("Unable to find an application for that Discord ID.", "info")
         return redirect(url_for("views.review"))
-
-    # Otherwise, redirect to the application that was found.
-    return redirect(f"/review/{id}")
-
-
-@bp.route("/search/email/<email>")
-@requires_authorization
-@utils.editors_only
-def search_application_by_email(email):
-    """
-    API endpoint to attempt to search for an application by the
-    applicants email address. If the applicant doesn't exist,
-    redirects back to the management panel home page.
-    """
-
-    # Attempt to lookup the SQLite ID by the email address.
-    id = db().get_application_id_from_email(email)
-
-    # If we were unable to find anything, flash an error and redirect.
-    if not id:
-        flash("Unable to find an application for that email.", "info")
-        return redirect(url_for("views.review"))
-
-    # Otherwise, redirect to the application that was found.
-    return redirect(f"/review/{id}")
-
-
-@bp.route("/search/username/<username>")
-@requires_authorization
-@utils.editors_only
-def search_application_by_username(username):
-    """
-    API endpoint to attempt to search for an application by the
-    applicants Discord username. If the applicant doesn't exist,
-    redirects back to the management panel home page.
-    """
-
-    # Attempt to lookup the SQLite ID by the email address.
-    username, discriminator = username.split("#")
-    id = db().get_application_id_from_discord_user(username=username, discriminator=discriminator)
-
-    # If we were unable to find anything, flash an error and redirect.
-    if not id:
-        flash("Unable to find an application for that username.", "info")
-        return redirect(url_for("views.review"))
-
-    # Otherwise, redirect to the application that was found.
     return redirect(f"/review/{id}")
 
 
@@ -228,10 +166,10 @@ def join_server():
     user = app.discord.fetch_user()
 
     # Using the user's Discord ID, get the application ID.
-    id = db().get_application_id_from_discord_id(user.id)
+    id = db.get_application_id_from_discord_id(user.id)
 
     # Request the application data from the database using the application ID.
-    application = db().get_application(id)
+    application = db.get_application(id)
 
     # Redirect the user back if they don't have an accepted application.
     if not application or not application["application_status"]:

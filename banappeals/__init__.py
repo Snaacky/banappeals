@@ -6,7 +6,7 @@ from flask import Flask
 from flask_discord import DiscordOAuth2Session
 
 from banappeals.blueprints import views, auth, api, utils
-from banappeals.database import Database
+from banappeals import database
 
 
 def create_app():
@@ -14,7 +14,7 @@ def create_app():
 
     if not os.path.isfile(os.path.join("config", ".flask_secret")):
         with open(os.path.join("config", ".flask_secret"), "w") as f:
-            f.write(''.join(random.choices(string.ascii_uppercase + string.digits, k=12)))
+            f.write("".join(random.choices(string.ascii_uppercase + string.digits, k=12)))
 
     with open(os.path.join("config", ".flask_secret"), "rb") as secret:
         app.secret_key = secret.read()

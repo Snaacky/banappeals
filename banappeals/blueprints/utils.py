@@ -8,7 +8,8 @@ from flask.helpers import url_for
 from flask_discord import Unauthorized
 from geoip import geolite2
 
-from banappeals.database import Database as db
+from banappeals import database as db
+
 
 bp = Blueprint("utils", __name__)
 
@@ -29,7 +30,7 @@ def get_reviewer_from_discord_id(id: int) -> dict:
     object containing all of the data about the user returned from the
     Discord API.
     """
-    return db().get_reviewer(id=id)
+    return db.get_reviewer(id=id)
 
 
 def check_if_ip_is_proxy(ip_address: str, api_key: str):

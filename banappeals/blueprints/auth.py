@@ -3,7 +3,8 @@ from flask import Blueprint, current_app as app, redirect
 from flask.helpers import url_for
 from flask_discord import requires_authorization, AccessDenied
 
-from banappeals.database import Database as db
+from banappeals import database as db
+
 
 bp = Blueprint("auth", __name__)
 
@@ -47,7 +48,7 @@ def callback():
     # Checks if the user who logged in is an editor and inserts them
     # into the database if this is their first login.
     if user.id in app.config["EDITORS"]:
-        reviewer = db().get_reviewer(id=app.discord.fetch_user().id)
+        reviewer = db.get_reviewer(id=app.discord.fetch_user().id)
 
     # Redirects to the home page after logging in.
     return redirect(url_for("views.index"))
