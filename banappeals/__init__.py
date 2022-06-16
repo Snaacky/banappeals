@@ -6,7 +6,7 @@ from flask import Flask
 from flask_discord import DiscordOAuth2Session
 
 from banappeals.blueprints import views, auth, api, utils
-from banappeals import database
+from banappeals import database as db
 
 
 def create_app():
@@ -31,7 +31,7 @@ def create_app():
         app.register_blueprint(utils.bp)
         app.discord = DiscordOAuth2Session(app)
 
-    Database().setup()
+    db.setup()
 
     return app
 
