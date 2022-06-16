@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from typing import Optional
 
@@ -9,7 +10,7 @@ def get() -> Database:
     """
     Returns an active connection to the database.
     """
-    return dataset.connect("sqlite:///config/data.db")
+    return dataset.connect(f"sqlite:///{os.path.join('config', 'data.db')}")
 
 
 def setup() -> None:
