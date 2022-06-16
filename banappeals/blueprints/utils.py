@@ -16,9 +16,7 @@ bp = Blueprint("utils", __name__)
 
 def get_discord_user_by_id(id: int) -> dict:
     """
-    Used as a utility to convert a Discord snowflake (ID) into an
-    object containing all of the data about the user returned from the
-    Discord API.
+    Returns Discord user data from the API for the snowflake provided.
     """
     return app.discord.bot_request(route=f"/users/{id}", method="GET")
 
@@ -26,19 +24,14 @@ def get_discord_user_by_id(id: int) -> dict:
 @app.add_template_filter
 def get_reviewer_from_discord_id(id: int) -> dict:
     """
-    Used as a utility to convert a Discord snowflake (ID) into an
-    object containing all of the data about the user returned from the
-    Discord API.
+    Returns a reviewer's user data from the database for the ID provided.
     """
     return db.get_reviewer(id=id)
 
 
 def check_if_ip_is_proxy(ip_address: str, api_key: str):
     """
-    Used as a utility during /submit POST, check_if_ip_is_proxy()
-    uses the Proxycheck to attempt to check if the IP address
-    that submitted the application was a proxy/VPN/Tor and returns
-    True or False accordingly.
+    Checks against ProxyCheck API if the IP address is a VPN/proxy.
     """
     urllib3.disable_warnings()
     http = urllib3.PoolManager()
@@ -58,10 +51,8 @@ def check_if_ip_is_proxy(ip_address: str, api_key: str):
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
     """
-    Declared as an error handler, redirect_unauthorized will redirect
-    unauthorized users who attempt to interact with an endpoint with
-    the @requires_authorization decorator back to the root of the
-    domain.
+    Redirects unauthorized users who access endpoints with the
+    @requires_authorization decorator back to the root domain.
     """
     return redirect(url_for("auth.login"))
 
@@ -69,9 +60,7 @@ def redirect_unauthorized(e):
 @app.add_template_filter
 def format_timestamp(s):
     """
-    Declared as a Jinja2 filter, format_timestamp is used to convert
-    Unix epoch timestamps stored in the database to a human readable
-    string of the time in UTC format.
+    Jinja2 filter used to convert Unix timestamps to a UTC format string.
     """
     return datetime.utcfromtimestamp(s).strftime("%m/%d/%Y at %H:%M UTC")
 
@@ -79,8 +68,7 @@ def format_timestamp(s):
 @app.add_template_filter
 def ip2geo(ip):
     """
-    Declared as Jinja2 filter, ip2geo is used to lookup the country
-    for a specific IP address.
+    Jinja2 filter used for resolving the country from an IP address.
     """
     try:
         return geolite2.lookup(ip).get_info_dict()["country"]["names"]["en"]
@@ -103,17 +91,6 @@ def editors_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if app.discord.fetch_user().id not in app.config["EDITORS"]:
-            flash("You do not have permission to access that.", "danger")
-            return redirect(url_for("views.index"))
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
-def admins_only(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if app.discord.fetch_user().id not in app.config["ADMINS"]:
             flash("You do not have permission to access that.", "danger")
             return redirect(url_for("views.index"))
         return f(*args, **kwargs)
