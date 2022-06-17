@@ -18,15 +18,15 @@
                      <img width="72" height="72" src="{{ url_for('static', filename='img/logo.png') }}">
                   </div> 
                   <div>
-                     <h1 class="fw-bold text-white" style="padding-top: 15px">Invite application</h1>
+                     <h1 class="fw-bold text-white" style="padding-top: 15px">Ban Appeals</h1>
                   </div>
                </div>
                <br>
                <b>Welcome to Snackbox!</b>
                <br><br>
-               <p>Snackbox is a community centralized around Japanese media, including anime, manga, music, and more. Anyone with an interest in these is welcome to submit an application. We're always striving to build the community and make it an even better place to be.</p>
-               <p><b>All responses are required unless otherwise noted.</b> Put some effort into your answers; applications with half-assed responses will be rejected without further consideration. You should make an attempt to use properly formatted English, as unintelligible responses are more likely to be rejected.</p>
-               <p>If you have already applied, you can check the status of your application <a class="text-white" href="/status">here</a>.</p>
+               <p>Snackbox is a community centralized around Chinese, Japanese, and Korean media, including anime, manga, music, and so on. Anyone with an interest in these topics is welcome to participate in our community. If you have been banned from our community, you are more than welcome to submit a ban appeal here.</p>
+               <p><b>All responses are required unless otherwise noted.</b> Put some effort into your answers; ban appeals with half-assed responses will be rejected without further consideration. You should make an attempt to use properly formatted English, as unintelligible responses are more likely to be rejected.</p>
+               <p>If you have already applied, you can check the status of your appeal <a class="text-white" href="/status">here</a>.</p>
             </div>
          </div>
       </div>
@@ -62,59 +62,58 @@
             {% endif %}
             {% endwith %}
 
-            {% if user and not eligible %}
-            <p>Your account is not eligible for application signup.</p>
+            {% if user and not banned %}
+            <p>Your account is not banned.</p>
             {% endif %}
+
             
-            {% if not accepting and closed_message %}
-            <p>{{ closed_message }}</p>
-            {% endif %}
-            
-            {% if not accepting and not closed_message %}
-            <p>Applications are not being accepted at this time.</p>
-            {% endif %}
-            
-            {% if user and status != True and eligible and accepting %}
+            {% if user and banned %}
+            <div class="float-end">
+               Not you? <a href="/logout">Log out.</a>
+            </div>
             <form action="/submit" method="post" onsubmit="return confirm('Are you sure you want to submit your form? You will not be able to edit it after submission.');">
                <div class="mb-5">
-                  <label for="emailAddress" class="form-label"><b>Question #1:</b> What is your email? <span title="Required" style="color:red">*</span></label>
-                  <input type="email" class="form-control" name="emailAddress" id="emailAddress" maxlength="100" required>
+                  <label for="username" class="form-label">Username:</label>
+                  <input type="text" class="form-control" name="username" id="username" maxlength="20" value="{{user.name}}#{{user.discriminator}}" disabled>
+                  <div id="usernameHelpBlock" class="form-text">
+                     The Discord username and discriminator of the account that was banned.
+                  </div>
                </div>
                <div class="mb-5">
-                  <label for="redditUsername" class="form-label"><b>Question #2:</b> What is your Reddit username?</label>
-                  <input type="text" class="form-control" name="redditUsername" id="redditUsername" maxlength="20">
+                  <label for="banReason" class="form-label">Ban Reason:</label>
+                  <input type="text" class="form-control" name="banReason" id="banReason" maxlength="20" value="{{banned['reason']}}" disabled>
+                  <div id="banReasonHelpBlock" class="form-text">
+                     Moderator provided reason when your ban was issued.
+                  </div>
                </div>
                <div class="mb-5">
-                  <label for="whereDidYouHear" class="form-label"><b>Question #3:</b> Where did you hear about Snackbox? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whereDidYouHear" name="whereDidYouHear" rows="5" maxlength="1500" required></textarea>
+                  <label for="whenWereYouBanned" class="form-label">Approximately when were you banned? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whenWereYouBanned" name="whenWereYouBanned" rows="3" maxlength="1500" required></textarea>
+                  <div id="whenWereYouBannedHelpBlock" class="form-text">
+                     It is important to note that you must wait at least one week before appealing your ban. Attempting to appeal before a week has passed will result in your appeal being rejection and being permanently barred from appealing again in the future.
+                  </div>
                </div>
                <div class="mb-5">
-                  <label for="tellUsAboutYourself" class="form-label"><b>Question #4:</b> Tell us a bit about yourself. <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="tellUsAboutYourself" name="tellUsAboutYourself" rows="5" maxlength="1500" required></textarea>
+                  <label for="whyWereYouBanned" class="form-label">In your own words, why were you banned? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyWereYouBanned" name="whyWereYouBanned" rows="5" maxlength="1500" required></textarea>
+                  <div id="whyYouWereBannedHelpBlock" class="form-text">
+                     Please be honest about the reason why you were banned and explain in detail the circumstances that led up to you being banned. Lying or being dishonest will result in your appeal being rejection and being permanently barred from appealing again in the future.
+                  </div>
                </div>
                <div class="mb-5">
-                  <label for="whatDoYouExpect" class="form-label"><b>Question #5:</b> What do you expect to get out of Snackbox? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatDoYouExpect" name="whatDoYouExpect" rows="5" maxlength="1500" required></textarea>
+                  <label for="whyShouldYouBeUnbanned" class="form-label">Why should you be unbanned? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyShouldYouBeUnbanned" name="whyShouldYouBeUnbanned" rows="5" maxlength="1500" required></textarea>
+                  <div id="whyShouldYouBeUnbannedHelpBlock" class="form-text">
+                     Please take your time, explain your case, and why you believe you should be unbanned in detail. We want to see you take responsibility for your actions and see some sort of evidence that you've grown and won't repeat your prior actions should you be let back into our community.
+                  </div>
                </div>
-               <div class="mb-5">
-                  <label for="whatDoYouKnowAbout" class="form-label"><b>Question #6:</b> What do you know about Snackbox already? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatDoYouKnowAbout" name="whatDoYouKnowAbout" rows="5" maxlength="1500" required></textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whyShouldYouBeOffered" class="form-label"><b>Question #7:</b> Why should you be offered a place in our community? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whyShouldYouBeOffered" name="whyShouldYouBeOffered" rows="5" maxlength="1500" required></textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatAnimeAreYouWatching" class="form-label"><b>Question #8:</b> What anime are you currently watching? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatAnimeAreYouWatching" name="whatAnimeAreYouWatching" rows="5" maxlength="1500" required></textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatIsYourFavoriteAnime" class="form-label"><b>Question #9:</b> What is your favorite anime and why? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatIsYourFavoriteAnime" name="whatIsYourFavoriteAnime" rows="5" maxlength="1500" required></textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="doYouHaveAList" class="form-label"><b>Question #10:</b> Do you have a MAL, AL, or Kitsu?</label>
-                  <textarea class="form-control" id="doYouHaveAList" name="doYouHaveAList" rows="5" maxlength="1500"></textarea>
+
+               <div class="mb-4">
+                  <label for="anythingElseToAdd" class="form-label">Is there anything else you would like to add?</label>
+                  <textarea class="form-control" id="anythingElseToAdd" name="anythingElseToAdd" rows="5" maxlength="1500"></textarea>
+                  <div id="anythingElseToAddHelpBlock" class="form-text">
+                     Any additional comments are welcome here. You are not required to fill this out if you have nothing else to add.
+                  </div>
                </div>
                <div class="d-grid">
                   <button class="btn btn-primary" type="submit">Submit</button>
