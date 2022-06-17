@@ -14,7 +14,7 @@
          </div>
       </div>
    </div>
-   {% if application %}
+   {% if appeal %}
    <div class="px-4 py-5">
       <div class="container">
          <div class="card mb-5" style="border-radius: 25%; border: 0;">
@@ -30,7 +30,7 @@
                   <thead>
                      <tr class="d-flex" style="--bs-table-bg: #151515!important;">
                         <th class="col-1">ID</th>
-                        <th class="col-3">Applicant</th>
+                        <th class="col-3">Appellant</th>
                         <th class="col-2">Submitted</th>
                         <th class="col-2">Country</th>
                         <th class="col-1">Status</th>
@@ -39,35 +39,35 @@
                   </thead>
                   <tbody style="--bs-table-bg: #1b1b1b;">
                      <tr class="d-flex">
-                        <th class="col-1" scope="row">{{ application.id }}</th>
+                        <th class="col-1" scope="row">{{ appeal.id }}</th>
                         <td class="col-3">
-                           {% if applicant.avatar %}
+                           {% if appellant.avatar %}
                            <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://cdn.discordapp.com/avatars/{{ applicant.id }}/{{ applicant.avatar }}.png">
                            {% else %}
                            <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://i.imgur.com/LIxmtb7.png">
                            {% endif %}
-                           {{ applicant.username }}#{{ applicant.discriminator }}
+                           {{ appellant.username }}#{{ appellant.discriminator }}
                         </td>
-                        <td class="col-2">{{ application.timestamp | format_timestamp}} </td>
-                        <td class="col-2">{{ application.ip_address | ip2geo }}</td>
-                        {% if application.application_status == None %}
+                        <td class="col-2">{{ appeal.timestamp | format_timestamp}} </td>
+                        <td class="col-2">{{ appeal.ip_address | ip2geo }}</td>
+                        {% if appeal.status == None %}
                         <td class="col-1 bg-light text-dark">Pending</td>
-                        {% elif application.application_status == True %}
+                        {% elif appeal.status == True %}
                         <td class="col-1 bg-success">Accepted</td>
                         {% else %}
                         <td class="col-1 bg-danger">Denied</td>
                         {% endif %} 
                         <td class="col-3">
-                           {% set application_reviewer = application.reviewed_by | get_reviewer_from_discord_id %}
-                           {% if application_reviewer %}
+                           {% set reviewer = appeal.reviewer | get_reviewer_from_discord_id %}
+                           {% if reviewer %}
                            
-                           {% if application.avatar %}
-                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://cdn.discordapp.com/avatars/{{ application_reviewer.discord_id }}/{{ application_reviewer.avatar }}.png">
+                           {% if appeal.avatar %}
+                           <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://cdn.discordapp.com/avatars/{{ reviwer.discord_id }}/{{ reviewer.avatar }}.png">
                            {% else %}
                            <img width="32" height="32" style="border-radius: 50%; margin-right: 5px" src="https://i.imgur.com/LIxmtb7.png">
                            {% endif %}
 
-                           {{ application_reviewer.username }}#{{ application_reviewer.discriminator }}
+                           {{ reviwer.username }}#{{ reviwer.discriminator }}
                            {% else %}
                            N/A
                            {% endif %}
@@ -88,116 +88,69 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
+            <!-- TODO: Move this into a separate template that can be imported because it is called twice. -->
             <form action="/submit" method="post">
                <div class="pb-4">
-                  <div class="float-start">
-                     {% if previous_app %}
-                     <a href="/review/{{ previous_app.id }}" class="btn btn-primary btn-sm">
-                     {% else %}
-                     <a href="#" class="btn btn-primary btn-sm disabled">
-                     {% endif %}
-                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
-                           <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5zM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5z"/>
-                        </svg>
-                        Previous
-                     </a>
-                     {% if next_app %}
-                     <a href="/review/{{ next_app.id }}" class="btn btn-primary btn-sm">
-                     {% else %}
-                     <a href="#" class="btn btn-primary btn-sm disabled">
-                     {% endif %}
-                        Next
-                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-right" viewBox="0 0 16 16">
-                           <path fill-rule="evenodd" d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8zm-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5z"/>
-                        </svg>
-                     </a>
-                  </div>
                   <div class="float-end">
-                     <a href="/approve/{{ application.id }}" class="btn btn-success btn-sm {% if application.application_status == True %} disabled {% endif %}">
+                     <a href="/review/approve/{{ appeal.id }}" class="btn btn-success btn-sm {% if appeal.status %} disabled {% endif %}">
                         <svg style="margin-top: -3px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
                         </svg>
-                        Accept Application
+                        Accept Appeal
                      </a>
-                     <a href="/reject/{{ application.id }}" class="btn btn-danger btn-sm {% if application.application_status == False %} disabled {% endif %}">
+                     <a href="/review/reject/{{ appeal.id }}" class="btn btn-danger btn-sm {% if not appeal.status %} disabled {% endif %}">
                         <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                         </svg>
-                        Reject Application
+                        Reject Appeal
                      </a>
                   </div>
                </div>
-               <div class="pt-5 mb-5">
-                  <label for="emailAddress" class="form-label"><b>Question #1:</b> What is your email? <span title="Required" style="color:red">*</span></label>
-                  <input type="email" class="form-control" name="emailAddress" id="emailAddress" maxlength="100" value="{{ application.email_address }}"readonly>
-               </div>
                <div class="mb-5">
-                  <label for="redditUsername" class="form-label"><b>Question #2:</b> What is your Reddit username?</label>
-                  <input type="text" class="form-control" name="redditUsername" id="redditUsername" maxlength="20" value="{{ application.reddit_username }} " readonly>
-               </div>
-               <div class="mb-5">
-                  <label for="whereDidYouHear" class="form-label"><b>Question #3:</b> Where did you hear about Snackbox? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whereDidYouHear" name="whereDidYouHear" rows="9" maxlength="1500" readonly>{{ application.referral }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="tellUsAboutYourself" class="form-label"><b>Question #4:</b> Tell us a bit about yourself. <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="tellUsAboutYourself" name="tellUsAboutYourself" rows="9" maxlength="1500" readonly>{{ application.about_me }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatDoYouExpect" class="form-label"><b>Question #5:</b> What do you expect to get out of Snackbox? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatDoYouExpect" name="whatDoYouExpect" rows="9" maxlength="1500" readonly>{{ application.expectations }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatDoYouKnowAbout" class="form-label"><b>Question #6:</b> What do you know about Snackbox already? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatDoYouKnowAbout" name="whatDoYouKnowAbout" rows="9" maxlength="1500" readonly>{{ application.already_known }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whyShouldYouBeOffered" class="form-label"><b>Question #7:</b> Why should you be offered a place in our community? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whyShouldYouBeOffered" name="whyShouldYouBeOffered" rows="9" maxlength="1500" readonly>{{ application.why_should_be_invited }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatAnimeAreYouWatching" class="form-label"><b>Question #8:</b> What anime are you currently watching? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatAnimeAreYouWatching" name="whatAnimeAreYouWatching" rows="9" maxlength="1500" readonly>{{ application.currently_watching }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="whatIsYourFavoriteAnime" class="form-label"><b>Question #9:</b> What is your favorite anime and why? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whatIsYourFavoriteAnime" name="whatIsYourFavoriteAnime" rows="9" maxlength="1500" readonly>{{ application.favorite_anime }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <label for="doYouHaveAList" class="form-label"><b>Question #10:</b> Do you have a MAL, AL, or Kitsu?</label>
-                  <textarea class="form-control" id="doYouHaveAList" name="doYouHaveAList" rows="9" maxlength="1500">{{ application.do_you_have_a_list }}</textarea>
-               </div>
-               <div class="mb-5">
-                  <div class="float-start">
-                     {% if previous_app %}
-                     <a href="/review/{{ previous_app.id }}" class="btn btn-primary btn-sm">
-                     {% else %}
-                     <a href="#" class="btn btn-primary btn-sm disabled">
-                     {% endif %}
-                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
-                           <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5zM10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5z"/>
-                        </svg>
-                        Previous
-                     </a>
-                     {% if next_app %}
-                     <a href="/review/{{ next_app.id }}" class="btn btn-primary btn-sm">
-                     {% else %}
-                     <a href="#" class="btn btn-primary btn-sm disabled">
-                     {% endif %}
-                        Next
-                        <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-right" viewBox="0 0 16 16">
-                           <path fill-rule="evenodd" d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8zm-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5z"/>
-                        </svg>
-                     </a>
+                  <label for="username" class="form-label">Username:</label>
+                  <input type="text" class="form-control" name="username" id="username" maxlength="20" value="{{appeal.discord_user}}" disabled>
+                  <div id="usernameHelpBlock" class="form-text">
+                     The Discord username and discriminator of the account that was banned.
                   </div>
+               </div>
+               <div class="mb-5">
+                  <label for="banReason" class="form-label">Ban Reason:</label>
+                  <input type="text" class="form-control" name="banReason" id="banReason" maxlength="20" value="{{appeal.discord_user}}" disabled>
+                  <div id="banReasonHelpBlock" class="form-text">
+                     Moderator provided reason when your ban was issued.
+                  </div>
+               </div>
+               <div class="mb-5">
+                  <label for="whyWereYouBanned" class="form-label">In your own words, why were you banned? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyWereYouBanned" name="whyWereYouBanned" rows="5" maxlength="1500" value="{{appeal.ban_explanation}}" disabled></textarea>
+                  <div id="whyYouWereBannedHelpBlock" class="form-text">
+                     Please be honest about the reason why you were banned and explain in detail the circumstances that led up to you being banned. Lying or being dishonest will result in your appeal being rejection and being permanently barred from appealing again in the future.
+                  </div>
+               </div>
+               <div class="mb-5">
+                  <label for="whyShouldYouBeUnbanned" class="form-label">Why should you be unbanned? <span title="Required" style="color:red">*</span></label>
+                  <textarea class="form-control" id="whyShouldYouBeUnbanned" name="whyShouldYouBeUnbanned" rows="5" maxlength="1500" value="{{appeal.unban_explantion}}" disabled></textarea>
+                  <div id="whyShouldYouBeUnbannedHelpBlock" class="form-text">
+                     Please take your time, explain your case, and why you believe you should be unbanned in detail. We want to see you take responsibility for your actions and see some sort of evidence that you've grown and won't repeat your prior actions should you be let back into our community.
+                  </div>
+               </div>
+
+               <div class="mb-4">
+                  <label for="anythingElseToAdd" class="form-label">Is there anything else you would like to add?</label>
+                  <textarea class="form-control" id="anythingElseToAdd" name="anythingElseToAdd" rows="5" maxlength="1500" value="{{appeal.additional_comments}}" disabled></textarea>
+                  <div id="anythingElseToAddHelpBlock" class="form-text">
+                     Any additional comments are welcome here. You are not required to fill this out if you have nothing else to add.
+                  </div>
+               </div>
+               <div class="mb-5">
                   <div class="float-end">
-                     <a href="/approve/{{ application.id }}" class="btn btn-success btn-sm {% if application.application_status == True %} disabled {% endif %}">
+                     <a href="/review/approve/{{ appeal.id }}" class="btn btn-success btn-sm {% if appeal.status %} disabled {% endif %}">
                         <svg style="margin-top: -3px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
                         </svg>
                         Accept Application
                      </a>
-                     <a href="/reject/{{ application.id }}" class="btn btn-danger btn-sm {% if application.application_status == False %} disabled {% endif %}">
+                     <a href="/review/reject/{{ appeal.id }}" class="btn btn-danger btn-sm {% if not appeal.status %} disabled {% endif %}">
                         <svg style="margin-top: -3px;"  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                         </svg>
@@ -208,7 +161,7 @@
             </form>
    {% endif %}
 
-            {% if not application and stats['total'] == 0 %}
+            {% if not appeal and stats['total'] == 0 %}
             <div class="py-5">
                <div class="container">
                   <div class="col-lg-6 mx-auto text-grey">
@@ -216,14 +169,14 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-square-text-fill" viewBox="0 0 16 16">
                            <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.5a1 1 0 0 0-.8.4l-1.9 2.533a1 1 0 0 1-1.6 0L5.3 12.4a1 1 0 0 0-.8-.4H2a2 2 0 0 1-2-2V2zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1h-9zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
                         </svg>
-                        No applications have been submitted.
+                        No appeals have been submitted.
                      </p>
                   </div>
                </div>
             </div>
             {% endif %}
             
-            {% if not application and stats['total'] >= 1 %} 
+            {% if not appeal and stats['total'] >= 1 %} 
             <div class="py-5">
                <div class="container">
                   <div class="col-lg-6 mx-auto text-grey">
@@ -231,7 +184,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-ui-radios" viewBox="0 0 16 16">
                            <path d="M7 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1zM0 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm7-1.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1zm0-5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zM3 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 4.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
                          </svg>
-                        There are no applications pending review.
+                        There are no appeals pending review.
                      </p>
                   </div>
                </div>

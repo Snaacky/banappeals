@@ -26,15 +26,15 @@ def review(id):
     if not id:
         return redirect(url_for("views.overview"))
 
-    application = db.get_application(id)
-    applicant = discord.get_discord_user_by_id(application["discord_id"])
+    appeal = db.get_application(id)
+    appellant = discord.get_discord_user_by_id(appeal["discord_id"])
 
     return render_template(
         template_name_or_list="review.htm",
         stats=db.get_stats(),
         reviewer=app.discord.fetch_user(),
-        applicant=applicant,
-        application=application,
+        appellant=appellant,
+        application=appeal,
     )
 
 
