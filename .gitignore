@@ -142,6 +142,8 @@ config/*
 .flask_secret
 *.db*
 .vscode/
+config.yml
+data.db
 
 # IDE cache
 .idea/*
