@@ -4,7 +4,7 @@ from flask import Blueprint, current_app as app, redirect, request, flash
 from flask.helpers import url_for
 from flask_discord import requires_authorization
 
-import blueprints.utils as utils
+from banappeals.blueprints import utils
 from banappeals import database as db
 
 
@@ -14,126 +14,56 @@ bp = Blueprint("api", __name__)
 @bp.route("/submit", methods=["POST"])
 @requires_authorization
 def submit():
-    """
-    API endpoint for the user's browser to submit their application
-    form data to the backend server for processing.
-
-    Strips any runoff data longer than the client-side form allows,
-    checks to make sure all the required variables were in the POST,
-    and inserts the data into the database.
-    """
-
-    # Don't allow users to submit more than one application.
     user = app.discord.fetch_user()
 
-    # Don't allow users to submit multiple applications per user.
     if db.get_application_id_from_discord_id(user.id):
         flash("You already submitted an application.", "danger")
         return redirect(url_for("views.index"))
 
-    # Add all of the POST'd variables into a dictionary for processing.
     data = {
-        "email_address": request.form.get("emailAddress")[0:100],
-        "reddit_username": request.form.get("redditUsername")[0:20],
-        "referral": request.form.get("whereDidYouHear")[0:1500],
-        "about_me": request.form.get("tellUsAboutYourself")[0:1500],
-        "expectations": request.form.get("whatDoYouExpect")[0:1500],
-        "already_known": request.form.get("whatDoYouKnowAbout")[0:1500],
-        "why_should_be_invited": request.form.get("whyShouldYouBeOffered")[0:1500],
-        "currently_watching": request.form.get("whatAnimeAreYouWatching")[0:1500],
-        "favorite_anime": request.form.get("whatIsYourFavoriteAnime")[0:1500],
-        "do_you_have_a_list": request.form.get("doYouHaveAList")[0:1500],
+        "ban_time": request.form.get("whenWereYouBanned")[0:1500],
+        "ban_reason_user": request.form.get("whyWereYouBanned")[0:1500],
+        "unban_reason_user": request.form.get("whyShouldYouBeUnbanned")[0:1500],
+        "additional_comments": request.form.get("anythingElseToAdd")[0:1500],
     }
 
-    # Check if any of the POST variables were missing and return HTTP 400 if so.
     if not any(
         [
-            data["email_address"],
-            data["reddit_username"],
-            data["referral"],
-            data["about_me"],
-            data["expectations"],
-            data["already_known"],
-            data["why_should_be_invited"],
-            data["currently_watching"],
-            data["favorite_anime"],
+            data["ban_time"],
+            data["ban_reason_user"],
+            data["unban_reason_user"],
+            data["additional_comments"],
         ]
     ):
         flash("POST data was missing from your submission.", "danger")
         return redirect(url_for("views.index"))
 
-    # Attempts to get the IP address from the header or falls back to the
-    # connecting IP address.
-    ip_address = request.headers.get("X-Real-IP") or request.remote_addr
-
-    # Check if a Proxycheck API key was set, if so, enable VPN detectiong.
-    if app.config["PROXYCHECK_KEY"]:
-        result = utils.check_if_ip_is_proxy(ip_address, app.config["PROXYCHECK_KEY"])
-
-        # If the result is True, the IP used was a proxy.
-        if result:
-            flash("We do not allow applications from proxies, VPNs, or Tor.", "danger")
-            return redirect(url_for("views.index"))
-
-        # If the result is None, an issue occurred with the Proxycheck API.
-        if result is None:
-            flash("An error occurred, please try again later.", "danger")
-            return redirect(url_for("views.index"))
-
-    # Further define the various variables we'll need to insert into the database.
-    data["username"] = user.name
-    data["discriminator"] = user.discriminator
-    data["avatar"] = user.avatar_hash
+    data["username"] = f"{user.name}#{user.discriminator}"
+    data["ban_reason"] = utils.is_user_banned(974468300304171038, user.id)["reason"]
     data["discord_id"] = user.id
     data["timestamp"] = int(time.time())
-    data["ip_address"] = ip_address
+    data["ip_address"] = request.headers.get("X-Real-IP") or request.remote_addr
     data["application_status"] = None
     data["reviewed_by"] = None
 
-    # Insert the received POST data into the database and return HTTP 200.
     db.insert_data_into_db(table="applications", data=data)
-    flash("Your application has been successfully submitted.", "info")
+    flash("Your appeal has been successfully submitted.", "info")
     return redirect(url_for("views.index"))
 
 
-@bp.route("/approve/<id>")
+@bp.route("/review/<operation>/<id>")
 @requires_authorization
 @utils.editors_only
-def accept_application(id):
-    """
-    API endpoint for the editors to accept an application. Updates
-    the entry in the database and then attempts to redirect to the
-    next application. If no newer applications exists, will redirect
-    back to application that was just accepted.
-    """
+def review_application(operation, id):
     reviewer = app.discord.fetch_user()
-    db.update_application_status(id, status=True, reviewed_by=reviewer.id)
-
-    # Redirects back to the last application if no newer exists.
-    next = db.get_application(int(id) + 1)
-    if not next:
-        return redirect(url_for("views.review"))
-
-    # Otherwise, redirects to the next application as expected.
-    return redirect(f"/review/{int(id) + 1}")
-
-
-@bp.route("/reject/<id>")
-@requires_authorization
-@utils.editors_only
-def reject_application(id):
-    """
-    API endpoint for the editors to reject an application. Updates
-    the entry in the database and then attempts to redirect to the
-    next application. If no newer applications exists, will redirect
-    back to application that was just accepted.
-    """
-    reviewer = app.discord.fetch_user()
-    db.update_application_status(id, status=False, reviewed_by=reviewer.id)
-    next = db.get_application(int(id) + 1)
-    if not next:
-        return redirect(url_for("views.index"))
-    return redirect(f"/review/{int(id) + 1}")
+    match operation:
+        case "approve":
+            db.update_application_status(id, status=True, reviewed_by=reviewer.id)
+        case "reject":
+            db.update_application_status(id, status=False, reviewed_by=reviewer.id)
+        case _:
+            flash("An invalid operation was provided for the application review.", "danger")
+            return redirect(url_for("views.overview"))
 
 
 @bp.route("/search/id/<id>")
@@ -162,21 +92,10 @@ def join_server():
     Does some basic checks to make sure the application was actually
     accepted instead of pending or rejected.
     """
-    # Get the current Discord user.
     user = app.discord.fetch_user()
-
-    # Using the user's Discord ID, get the application ID.
     id = db.get_application_id_from_discord_id(user.id)
-
-    # Request the application data from the database using the application ID.
     application = db.get_application(id)
-
-    # Redirect the user back if they don't have an accepted application.
     if not application or not application["application_status"]:
         return redirect(url_for("views.status"))
-
-    # Otherwise, add the user to the server with the bot application.
     user.add_to_guild(guild_id=app.config["GUILD_ID"])
-
-    # Redirect the users browser to the Discord URL for the server.
     return redirect(f"https://discord.com/channels/{app.config['GUILD_ID']}")
