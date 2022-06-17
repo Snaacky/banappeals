@@ -5,7 +5,6 @@ import string
 from flask import Flask
 from flask_discord import DiscordOAuth2Session
 
-from banappeals.blueprints import views, auth, api, utils
 from banappeals import database as db
 
 
@@ -25,6 +24,8 @@ def create_app():
     app.config["DISCORD_BOT_TOKEN"] = os.environ.get("DISCORD_BOT_TOKEN")
 
     with app.app_context():
+        from banappeals.blueprints import views, auth, api, utils
+
         app.register_blueprint(views.bp)
         app.register_blueprint(auth.bp)
         app.register_blueprint(api.bp)
