@@ -68,6 +68,9 @@
 
             
             {% if user and banned %}
+            <div id="whenWereYouBannedHelpBlock" class="form-text mb-5">
+               <strong>NOTICE:</strong> It is important to note that you must wait at least one week before appealing your ban. Attempting to appeal before a week has passed will result in your appeal being rejection and being permanently barred from appealing again in the future.
+            </div>
             <div class="float-end">
                Not you? <a href="/logout">Log out.</a>
             </div>
@@ -84,13 +87,6 @@
                   <input type="text" class="form-control" name="banReason" id="banReason" maxlength="20" value="{{banned['reason']}}" disabled>
                   <div id="banReasonHelpBlock" class="form-text">
                      Moderator provided reason when your ban was issued.
-                  </div>
-               </div>
-               <div class="mb-5">
-                  <label for="whenWereYouBanned" class="form-label">Approximately when were you banned? <span title="Required" style="color:red">*</span></label>
-                  <textarea class="form-control" id="whenWereYouBanned" name="whenWereYouBanned" rows="3" maxlength="1500" required></textarea>
-                  <div id="whenWereYouBannedHelpBlock" class="form-text">
-                     It is important to note that you must wait at least one week before appealing your ban. Attempting to appeal before a week has passed will result in your appeal being rejection and being permanently barred from appealing again in the future.
                   </div>
                </div>
                <div class="mb-5">
