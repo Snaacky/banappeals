@@ -25,17 +25,11 @@ def setup() -> None:
 
     applications = db.create_table("applications")
     applications.create_column("discord_id", db.types.bigint)
+    applications.create_column("discord_user", db.types.text)
     applications.create_column("timestamp", db.types.bigint)
     applications.create_column("ip_address", db.types.bigint)
-    applications.create_column("reddit_username", db.types.text)
-    applications.create_column("referral", db.types.text)
-    applications.create_column("about_me", db.types.text)
-    applications.create_column("expectations", db.types.text)
-    applications.create_column("already_known", db.types.text)
-    applications.create_column("why_should_be_invited", db.types.text)
-    applications.create_column("currently_watching", db.types.text)
-    applications.create_column("favorite_anime", db.types.text)
-    applications.create_column("do_you_have_a_list", db.types.text)
+    applications.create_column("ban_reason", db.types.text)
+    applications.create_column("user_form", db.types.text)
     applications.create_column("application_status", db.types.boolean)
     applications.create_column("reviewed_by", db.types.bigint)
 
@@ -45,8 +39,7 @@ def setup() -> None:
 
 def check_if_app_exists(discord_id: int) -> bool:
     """
-    Checks whether an application exists for the specified application
-    and returns True or False accordingly.
+    Checks whether an application exists and returns True or False.
     """
     db = get()
     entry = db["applications"].find_one(discord_id=discord_id)
@@ -67,8 +60,7 @@ def insert_data_into_db(table: str, data: dict) -> None:
 def get_stats() -> dict:
     """
     Iterates over the entire database to get statistics about the
-    total, pending, accepted, and declined stats of the applications
-    in the database.
+    total, pending, accepted, and declined stats of the applications.
     """
     db = get()
     results = list(db.query("SELECT * from applications"))
@@ -85,7 +77,7 @@ def get_stats() -> dict:
 
 def get_application(id) -> OrderedDict:
     """
-    Returns the application data for the specified SQLite row ID.
+    Returns the application data for the specified row ID.
     """
     db = get()
     result = db["applications"].find_one(id=id)
@@ -105,7 +97,7 @@ def get_reviewer(id) -> OrderedDict:
 
 def update_application_status(id: int, status: bool, reviewed_by: str) -> None:
     """
-    Updates the status of the application with the new application
+    Updates the status of the application with the new
     status and the user#tag of who reviewed the application.
     """
     db = get()
