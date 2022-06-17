@@ -1,0 +1,11 @@
+flask:
+  secret: YOUR_SECURE_SECRET_HERE
+discord:
+  id: YOUR_CLIENT_ID_HERE
+  secret: YOUR_CLIENT_SECRET_HERE
+  token: YOUR_BOT_TOKEN_HERE
+  callback: http://127.0.0.1:5000/callback
+guild:
+  guild_id: YOUR_GUILD_ID_HERE
+  roles:
+    staff: YOUR_STAFF_ROLE_ID_HERE

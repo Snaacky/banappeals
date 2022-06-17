@@ -1,10 +1,10 @@
 from flask import Blueprint, current_app as app
 
 
-bp = Blueprint("utils", __name__)
+bp = Blueprint("discord", __name__)
 
 
-def get_discord_user_by_id(id: int) -> dict:
+def get_user_by_id(id: int) -> dict:
     return app.discord.bot_request(route=f"/users/{id}", method="GET")
 
 
