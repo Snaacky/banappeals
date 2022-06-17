@@ -3,6 +3,7 @@ from flask_discord import requires_authorization
 
 import banappeals.blueprints.utils as utils
 from banappeals import database as db
+from banappeals.blueprints.auth import staff_only
 
 
 bp = Blueprint("views", __name__)
@@ -20,7 +21,7 @@ def index():
 @bp.route("/review", defaults={"id": None})
 @bp.route("/review/<id>")
 @requires_authorization
-@utils.editors_only
+@staff_only
 def review(id):
     if not id:
         return redirect(url_for("views.overview"))
@@ -55,7 +56,7 @@ def status():
 
 @bp.route("/overview")
 @requires_authorization
-@utils.editors_only
+@staff_only
 def overview():
     return render_template(
         template_name_or_list="overview.htm",

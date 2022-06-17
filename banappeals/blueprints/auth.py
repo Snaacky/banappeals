@@ -1,7 +1,7 @@
-from flask import Blueprint, current_app as app, redirect
+from functools import wraps
 
-from flask.helpers import url_for
-from flask_discord import requires_authorization, AccessDenied
+from flask import Blueprint, current_app as app, redirect, flash, url_for
+from flask_discord import requires_authorization, AccessDenied, Unauthorized
 
 
 bp = Blueprint("auth", __name__)
@@ -9,34 +9,36 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/login")
 def login():
-    """
-    This endpoint creates a Discord OAuth session and redirects
-    the user to the Discord login page for authentication with
-    the Discord application we created.
-    """
     return app.discord.create_session(scope=["identify", "guilds.join"])
 
 
 @bp.route("/logout")
 @requires_authorization
 def logout():
-    """
-    This endpoint kills the Discord OAuth session and redirects
-    the user to the root of the domain.
-    """
     app.discord.revoke()
     return redirect(url_for("views.index"))
 
 
 @bp.route("/callback")
 def callback():
-    """
-    This endpoint is handled by Flask-Discord but is the callback
-    where the Discord authentication service interacts with our web
-    app post-authentication.
-    """
     try:
         app.discord.callback()
     except AccessDenied:
         return redirect(url_for("views.index"))
     return redirect(url_for("views.index"))
+
+
+def staff_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if app.discord.fetch_user().id not in app.config["EDITORS"]:
+            flash("You do not have permission to access that.", "danger")
+            return redirect(url_for("views.index"))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+@app.errorhandler(Unauthorized)
+def redirect_unauthorized(e):
+    return redirect(url_for("auth.login"))
