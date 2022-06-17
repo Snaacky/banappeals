@@ -40,15 +40,9 @@ def callback():
     try:
         app.discord.callback()
     except AccessDenied:
-        # If the user canceled the OAuth, redirect instead of error.
         return redirect(url_for("views.index"))
 
     user = app.discord.fetch_user()
-
-    # Checks if the user who logged in is an editor and inserts them
-    # into the database if this is their first login.
-    if user.id in app.config["EDITORS"]:
-        reviewer = db.get_reviewer(id=app.discord.fetch_user().id)
 
     # Redirects to the home page after logging in.
     return redirect(url_for("views.index"))
