@@ -4,10 +4,8 @@ from flask import Blueprint, current_app as app, redirect, request, flash
 from flask.helpers import url_for
 from flask_discord import requires_authorization
 
-from banappeals.blueprints import utils
 from banappeals import database as db
 from banappeals.blueprints.auth import staff_only
-from banappeals.blueprints.discord import get_ban
 
 
 bp = Blueprint("api", __name__)
