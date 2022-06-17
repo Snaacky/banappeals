@@ -7,40 +7,27 @@ from dataset import Database
 
 
 def get() -> Database:
-    """
-    Returns an active connection to the database.
-    """
     return dataset.connect(f"sqlite:///{os.path.join('config', 'data.db')}")
 
 
 def setup() -> None:
-    """
-    Connects to the database and attempts to create a new table and
-    the required columns columns needed for storing applications data.
-    """
     db = get()
-
-    reviewers = db.create_table("reviewers")
-    reviewers.create_column("discord_id", db.types.bigint)
-
     applications = db.create_table("applications")
-    applications.create_column("discord_id", db.types.bigint)
     applications.create_column("discord_user", db.types.text)
+    applications.create_column("discord_id", db.types.bigint)
+    applications.create_column("ban_reason", db.types.text)
+    applications.create_column("ban_explanation", db.types.text)
+    applications.create_column("unban_explanation", db.types.text)
+    applications.create_column("additional_comments", db.types.text)
+    applications.create_column("status", db.types.boolean)
+    applications.create_column("reviewer", db.types.bigint)
     applications.create_column("timestamp", db.types.bigint)
     applications.create_column("ip_address", db.types.bigint)
-    applications.create_column("ban_reason", db.types.text)
-    applications.create_column("user_form", db.types.text)
-    applications.create_column("application_status", db.types.boolean)
-    applications.create_column("reviewed_by", db.types.bigint)
-
     db.commit()
     db.close()
 
 
 def check_if_app_exists(discord_id: int) -> bool:
-    """
-    Checks whether an application exists and returns True or False.
-    """
     db = get()
     entry = db["applications"].find_one(discord_id=discord_id)
     db.close()
@@ -48,9 +35,6 @@ def check_if_app_exists(discord_id: int) -> bool:
 
 
 def insert_data_into_db(table: str, data: dict) -> None:
-    """
-    Inserts the data from a passed dictionary into the table.
-    """
     db = get()
     db[table].insert(data)
     db.commit()
@@ -58,48 +42,27 @@ def insert_data_into_db(table: str, data: dict) -> None:
 
 
 def get_stats() -> dict:
-    """
-    Iterates over the entire database to get statistics about the
-    total, pending, accepted, and declined stats of the applications.
-    """
     db = get()
     results = list(db.query("SELECT * from applications"))
     stats = {"pending": 0, "total": len(results), "accepted": 0, "denied": 0}
     for row in results:
-        if row["application_status"] is None:  # the app is pending.
+        if row["application_status"] is None:
             stats["pending"] += 1
-        if row["application_status"]:  # the app is accepted.
+        if row["application_status"]:
             stats["accepted"] += 1
-        if not row["application_status"]:  # the app is denied.
+        if not row["application_status"]:
             stats["denied"] += 1
     return stats
 
 
 def get_application(id) -> OrderedDict:
-    """
-    Returns the application data for the specified row ID.
-    """
     db = get()
     result = db["applications"].find_one(id=id)
     db.close()
     return result
 
 
-def get_reviewer(id) -> OrderedDict:
-    """
-    Returns the reviewer data for the specified Discord ID.
-    """
-    db = get()
-    reviewer = db["reviewers"].find_one(discord_id=id)
-    db.close()
-    return reviewer if reviewer else None
-
-
 def update_application_status(id: int, status: bool, reviewed_by: str) -> None:
-    """
-    Updates the status of the application with the new
-    status and the user#tag of who reviewed the application.
-    """
     db = get()
     application = db["applications"].find_one(id=id)
     application["application_status"] = status
@@ -110,10 +73,6 @@ def update_application_status(id: int, status: bool, reviewed_by: str) -> None:
 
 
 def get_application_id_from_discord_id(id: int) -> Optional[int]:
-    """
-    Attempts to search for an application in the database by
-    the Discord ID and returns the ID of the application found.
-    """
     db = get()
     application = db["applications"].find_one(discord_id=id)
     db.close()
@@ -121,10 +80,6 @@ def get_application_id_from_discord_id(id: int) -> Optional[int]:
 
 
 def get_application_id_from_ip(ip_address: str) -> Optional[int]:
-    """
-    Attempts to search for an application in the database by
-    the IP address and returns the ID of the application found.
-    """
     db = get()
     application = db["applications"].find_one(ip_address=ip_address)
     db.close()
