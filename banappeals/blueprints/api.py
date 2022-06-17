@@ -6,6 +6,8 @@ from flask_discord import requires_authorization
 
 from banappeals.blueprints import utils
 from banappeals import database as db
+from banappeals.blueprints.auth import staff_only
+from banappeals.blueprints.discord import get_ban
 
 
 bp = Blueprint("api", __name__)
@@ -53,7 +55,7 @@ def submit():
 
 @bp.route("/review/<operation>/<id>")
 @requires_authorization
-@utils.editors_only
+@staff_only
 def review_application(operation, id):
     reviewer = app.discord.fetch_user()
     match operation:
@@ -68,13 +70,8 @@ def review_application(operation, id):
 
 @bp.route("/search/id/<id>")
 @requires_authorization
-@utils.editors_only
+@staff_only
 def search_application_by_id(id):
-    """
-    API endpoint to attempt to search for an application by the
-    applicants Discord ID. If the applicant doesn't exist,
-    redirects back to the review panel home page.
-    """
     id = db.get_application_id_from_discord_id(id)
     if not id:
         flash("Unable to find an application for that Discord ID.", "info")
@@ -85,13 +82,6 @@ def search_application_by_id(id):
 @bp.route("/join")
 @requires_authorization
 def join_server():
-    """
-    API endpoint for accepted users to be able to join the server
-    and redirects them to the server's Discord URL after adding them.
-
-    Does some basic checks to make sure the application was actually
-    accepted instead of pending or rejected.
-    """
     user = app.discord.fetch_user()
     id = db.get_application_id_from_discord_id(user.id)
     application = db.get_application(id)
