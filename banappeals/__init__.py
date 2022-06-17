@@ -24,11 +24,12 @@ def create_app():
     app.config["DISCORD_BOT_TOKEN"] = os.environ.get("DISCORD_BOT_TOKEN")
 
     with app.app_context():
-        from banappeals.blueprints import views, auth, api, utils
+        from banappeals.blueprints import api, auth, filters, utils, views
 
-        app.register_blueprint(views.bp)
-        app.register_blueprint(auth.bp)
         app.register_blueprint(api.bp)
+        app.register_blueprint(auth.bp)
+        app.register_blueprint(filters.bp)
+        app.register_blueprint(views.bp)
         app.register_blueprint(utils.bp)
         app.discord = DiscordOAuth2Session(app)
 
