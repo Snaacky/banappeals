@@ -7,7 +7,7 @@ from dataset import Database
 
 
 def get() -> Database:
-    return dataset.connect(f"sqlite:///{os.path.join('config', 'data.db')}")
+    return dataset.connect(f"sqlite:///{os.path.join(os.getcwd(), 'data.db')}")
 
 
 def setup() -> None:
