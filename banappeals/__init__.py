@@ -11,13 +11,12 @@ def create_app():
     app = Flask(__name__)
 
     # TODO: Add check to verify all of the values used below exist in the config.
-    config = parse_config(os.path.join("config", "config.yml"))
-
-    app.secret_key = config["flask"]["secret"]
-    app.config["DISCORD_CLIENT_ID"] = config["discord"]["id"]
-    app.config["DISCORD_CLIENT_SECRET"] = config["discord"]["secret"]
-    app.config["DISCORD_REDIRECT_URI"] = config["discord"]["callback"]
-    app.config["DISCORD_BOT_TOKEN"] = config["discord"]["token"]
+    app.config = app.config | parse_config(os.path.join("config", "config.yml"))
+    app.secret_key = app.config["flask"]["secret"]
+    app.config["DISCORD_CLIENT_ID"] = app.config["discord"]["id"]
+    app.config["DISCORD_CLIENT_SECRET"] = app.config["discord"]["secret"]
+    app.config["DISCORD_REDIRECT_URI"] = app.config["discord"]["callback"]
+    app.config["DISCORD_BOT_TOKEN"] = app.config["discord"]["token"]
 
     with app.app_context():
         from banappeals.blueprints import api, auth, discord, filters, views
