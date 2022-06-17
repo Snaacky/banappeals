@@ -3,8 +3,6 @@ from flask import Blueprint, current_app as app, redirect
 from flask.helpers import url_for
 from flask_discord import requires_authorization, AccessDenied
 
-from banappeals import database as db
-
 
 bp = Blueprint("auth", __name__)
 
@@ -41,8 +39,4 @@ def callback():
         app.discord.callback()
     except AccessDenied:
         return redirect(url_for("views.index"))
-
-    user = app.discord.fetch_user()
-
-    # Redirects to the home page after logging in.
     return redirect(url_for("views.index"))
