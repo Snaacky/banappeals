@@ -26,7 +26,7 @@ def review(id):
     if not id:
         return redirect(url_for("views.overview"))
 
-    appeal = db.get_application(id)
+    appeal = db.get_appeal(id=id)
     appellant = discord.get_discord_user_by_id(appeal["discord_id"])
 
     return render_template(
@@ -34,7 +34,7 @@ def review(id):
         stats=db.get_stats(),
         reviewer=app.discord.fetch_user(),
         appellant=appellant,
-        application=appeal,
+        appeal=appeal,
     )
 
 
@@ -43,12 +43,12 @@ def review(id):
 def status():
     user = app.discord.fetch_user()
 
-    id = db.get_application_id_from_discord_id(user.id)
+    id = db.get_appeal(discord_id=user.id)
     if not id:
         flash("You have not submitted an appeal.", "danger")
         return redirect(url_for("views.index"))
 
-    return render_template(template_name_or_list="status.htm", application=db.get_application(id))
+    return render_template(template_name_or_list="status.htm", appeal=db.get_application(id))
 
 
 @bp.route("/overview")
@@ -59,5 +59,5 @@ def overview():
         template_name_or_list="overview.htm",
         stats=db.get_stats(),
         reviewer=app.discord.fetch_user(),
-        applications=db.get_reviewed_applications(),
+        applications=db.get_all_applications(),
     )

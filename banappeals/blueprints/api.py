@@ -4,10 +4,10 @@ from flask import Blueprint, current_app as app, redirect, request, flash
 from flask.helpers import url_for
 from flask_discord import requires_authorization
 
-from banappeals.blueprints import utils
 from banappeals import database as db
 from banappeals.blueprints.auth import staff_only
 from banappeals.blueprints.discord import get_ban
+from banappeals.modals import Appeal
 
 
 bp = Blueprint("api", __name__)
@@ -18,37 +18,34 @@ bp = Blueprint("api", __name__)
 def submit():
     user = app.discord.fetch_user()
 
-    if db.get_application_id_from_discord_id(user.id):
+    if db.get_appeal(discord_id=user.id):
         flash("You already submitted an application.", "danger")
         return redirect(url_for("views.index"))
 
-    data = {
-        "ban_time": request.form.get("whenWereYouBanned")[0:1500],
-        "ban_reason_user": request.form.get("whyWereYouBanned")[0:1500],
-        "unban_reason_user": request.form.get("whyShouldYouBeUnbanned")[0:1500],
-        "additional_comments": request.form.get("anythingElseToAdd")[0:1500],
-    }
-
     if not any(
         [
-            data["ban_time"],
-            data["ban_reason_user"],
-            data["unban_reason_user"],
-            data["additional_comments"],
+            request.form.get("whyWereYouBanned"),
+            request.form.get("whyShouldYouBeUnbanned"),
+            request.form.get("anythingElseToAdd"),
         ]
     ):
         flash("POST data was missing from your submission.", "danger")
         return redirect(url_for("views.index"))
 
-    data["username"] = f"{user.name}#{user.discriminator}"
-    data["ban_reason"] = utils.is_user_banned(974468300304171038, user.id)["reason"]
-    data["discord_id"] = user.id
-    data["timestamp"] = int(time.time())
-    data["ip_address"] = request.headers.get("X-Real-IP") or request.remote_addr
-    data["application_status"] = None
-    data["reviewed_by"] = None
+    appeal = Appeal(
+        discord_user=f"{user.name}#{user.discriminator}",
+        discord_id=user.id,
+        ban_reason=get_ban(user.id)["reason"],
+        ban_explanation=request.form.get("whyWereYouBanned")[0:1500],
+        unban_explantion=request.form.get("whyShouldYouBeUnbanned")[0:1500],
+        additional_comments=request.form.get("anythingElseToAdd")[0:1500],
+        status=None,
+        reviewer=None,
+        timestamp=int(time.time()),
+        ip_address=request.headers.get("X-Real-IP") or request.remote_addr,
+    )
+    appeal.save()
 
-    db.insert_data_into_db(table="applications", data=data)
     flash("Your appeal has been successfully submitted.", "info")
     return redirect(url_for("views.index"))
 
@@ -56,13 +53,19 @@ def submit():
 @bp.route("/review/<operation>/<id>")
 @requires_authorization
 @staff_only
-def review_application(operation, id):
+def review_appeal(operation, id):
     reviewer = app.discord.fetch_user()
+
+    appeal = Appeal()
+    data = db.get_appeal(id)
+    for key in data:
+        setattr(appeal, key, data[key])
+
     match operation:
         case "approve":
-            db.update_application_status(id, status=True, reviewed_by=reviewer.id)
+            appeal.approve(reviewer.id)
         case "reject":
-            db.update_application_status(id, status=False, reviewed_by=reviewer.id)
+            appeal.reject(reviewer.id)
         case _:
             flash("An invalid operation was provided for the application review.", "danger")
             return redirect(url_for("views.overview"))
@@ -71,11 +74,11 @@ def review_application(operation, id):
 @bp.route("/search/id/<id>")
 @requires_authorization
 @staff_only
-def search_application_by_id(id):
-    id = db.get_application_id_from_discord_id(id)
+def get_appeal_by_id(id):
+    id = db.get_appeal(discord_id=id)
     if not id:
         flash("Unable to find an application for that Discord ID.", "info")
-        return redirect(url_for("views.review"))
+        return redirect(url_for("views.overview"))
     return redirect(f"/review/{id}")
 
 
@@ -83,9 +86,8 @@ def search_application_by_id(id):
 @requires_authorization
 def join_server():
     user = app.discord.fetch_user()
-    id = db.get_application_id_from_discord_id(user.id)
-    application = db.get_application(id)
-    if not application or not application["application_status"]:
+    appeal = db.get_appeal(discord_id=user.id)
+    if not appeal or not appeal["status"]:
         return redirect(url_for("views.status"))
     user.add_to_guild(guild_id=app.config["GUILD_ID"])
     return redirect(f"https://discord.com/channels/{app.config['GUILD_ID']}")
