@@ -142,3 +142,4 @@ config/*
 .flask_secret
 *.db*
 .vscode/
+.idea/

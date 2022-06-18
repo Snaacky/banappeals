@@ -3,6 +3,8 @@ from functools import wraps
 from flask import Blueprint, current_app as app, redirect, flash, url_for
 from flask_discord import requires_authorization, AccessDenied, Unauthorized
 
+from banappeals.blueprints.discord import is_staff
+
 
 bp = Blueprint("auth", __name__)
 
@@ -31,10 +33,12 @@ def callback():
 def staff_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if app.discord.fetch_user().id not in app.config["EDITORS"]:
-            flash("You do not have permission to access that.", "danger")
-            return redirect(url_for("views.index"))
-        return f(*args, **kwargs)
+        user = app.discord.fetch_user()
+        if is_staff(user.id):
+            return f(*args, **kwargs)
+
+        flash("You do not have permission to access that.", "danger")
+        return redirect(url_for("views.index"))
 
     return decorated_function
 
