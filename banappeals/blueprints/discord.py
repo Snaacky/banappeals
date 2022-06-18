@@ -16,8 +16,8 @@ def unban_user(user_id: str):
     return False if result.get("user") else True
 
 
-def is_staff() -> bool:
-    route = f"/users/@me/guilds/{app.config['guild']['guild_id']}/member"
-    member = app.discord.request(route=route, method="GET")
-
-    return True if app.config["guild"]["roles"]["staff"] in member["roles"] else False
+def is_staff(user_id: str) -> bool:
+    route = f"/guilds/{app.config['guild']['guild_id']}/members/{user_id}"
+    member = app.discord.bot_request(route=route, method="GET")
+    staff_role = str(app.config["guild"]["roles"]["staff"])
+    return True if staff_role in member["roles"] else False

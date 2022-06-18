@@ -11,7 +11,7 @@ bp = Blueprint("auth", __name__)
 
 @bp.route("/login")
 def login():
-    return app.discord.create_session(scope=["identify", "guilds.join", "guilds.members.read"])
+    return app.discord.create_session(scope=["identify", "guilds.join"])
 
 
 @bp.route("/logout")
@@ -33,7 +33,8 @@ def callback():
 def staff_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if is_staff():
+        user = app.discord.fetch_user()
+        if is_staff(user.id):
             return f(*args, **kwargs)
 
         flash("You do not have permission to access that.", "danger")
