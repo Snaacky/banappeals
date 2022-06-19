@@ -14,3 +14,13 @@ def unban_user(user_id: str):
     route = f"/guilds/{app.config['guild']['guild_id']}/bans/{user_id}"
     result = app.discord.bot_request(route=route, method="DELETE")
     return False if result.get("user") else True
+
+
+def get_server_user(user_id: str):
+    route = f"/guilds/{app.config['guild']['guild_id']}/members/{user_id}"
+    return app.discord.bot_request(route=route, method="GET")
+
+
+def get_user(user_id: str):
+    route = f"/users/{user_id}"
+    return app.discord.bot_request(route=route, method="GET")
