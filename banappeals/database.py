@@ -10,31 +10,32 @@ def get() -> dataset.Database:
 
 def setup() -> None:
     db = get()
-    applications = db.create_table("applications")
-    applications.create_column("discord_user", db.types.text)
-    applications.create_column("discord_id", db.types.bigint)
-    applications.create_column("ban_reason", db.types.text)
-    applications.create_column("ban_explanation", db.types.text)
-    applications.create_column("unban_explanation", db.types.text)
-    applications.create_column("additional_comments", db.types.text)
-    applications.create_column("status", db.types.boolean)
-    applications.create_column("reviewer", db.types.bigint)
-    applications.create_column("timestamp", db.types.bigint)
-    applications.create_column("ip_address", db.types.bigint)
+    appeals = db.create_table("appeals")
+    appeals.create_column("discord_user", db.types.text)
+    appeals.create_column("discord_id", db.types.bigint)
+    appeals.create_column("ban_reason", db.types.text)
+    appeals.create_column("ban_explanation", db.types.text)
+    appeals.create_column("unban_explanation", db.types.text)
+    appeals.create_column("additional_comments", db.types.text)
+    appeals.create_column("status", db.types.boolean)
+    appeals.create_column("reviewer", db.types.bigint)
+    appeals.create_column("timestamp", db.types.bigint)
+    appeals.create_column("ip_address", db.types.bigint)
+    appeals.create_column("banned", db.types.boolean)
     db.commit()
     db.close()
 
 
 def check_if_app_exists(discord_id: int) -> bool:
     db = get()
-    entry = db["applications"].find_one(discord_id=discord_id)
+    entry = db["appeals"].find_one(discord_id=discord_id)
     db.close()
     return True if entry else False
 
 
 def get_stats() -> dict:
     db = get()
-    results = list(db.query("SELECT * from applications"))
+    results = list(db.query("SELECT * from appeals"))
     stats = {"pending": 0, "total": len(results), "accepted": 0, "rejected": 0}
     for row in results:
         if row["application_status"] is None:
@@ -55,6 +56,6 @@ def get_appeal(id: int = None, discord_id: int = None) -> OrderedDict:
 
 def get_appeals() -> OrderedDict:
     db = get()
-    results = list(db.query("SELECT * from applications"))
+    results = list(db.query("SELECT * from appeals"))
     db.close()
     return results

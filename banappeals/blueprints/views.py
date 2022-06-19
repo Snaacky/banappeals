@@ -59,5 +59,5 @@ def overview():
         template_name_or_list="overview.htm",
         stats=db.get_stats(),
         reviewer=app.discord.fetch_user(),
-        applications=db.get_all_applications(),
+        appeals=db.get_appeals(),
     )
