@@ -37,7 +37,7 @@ def submit():
         discord_id=user.id,
         ban_reason=get_ban(user.id)["reason"],
         ban_explanation=request.form.get("whyWereYouBanned")[0:1500],
-        unban_explantion=request.form.get("whyShouldYouBeUnbanned")[0:1500],
+        unban_explanation=request.form.get("whyShouldYouBeUnbanned")[0:1500],
         additional_comments=request.form.get("anythingElseToAdd")[0:1500],
         status=None,
         reviewer=None,

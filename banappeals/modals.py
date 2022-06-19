@@ -8,7 +8,7 @@ class Appeal:
         discord_id: int,
         ban_reason: str,
         ban_explanation: str,
-        unban_explantion: str,
+        unban_explanation: str,
         additional_comments: str,
         status: bool,
         reviewer: str,
@@ -19,7 +19,7 @@ class Appeal:
         self.discord_id = discord_id
         self.ban_reason = ban_reason
         self.ban_explanation = ban_explanation
-        self.unban_explantion = unban_explantion
+        self.unban_explanation = unban_explanation
         self.additional_comments = additional_comments
         self.status = status
         self.reviewer = reviewer
